@@ -1130,6 +1130,22 @@ const PAIR = {}, MU = {};
     h.pr = (MATCH.pre && MATCH.pre.hero) ? (MATCH.pre.hero[h.code]||0) : 0;
   });
 })();
+/* 1픽 물량 기준 — 최근 3주 1픽 최다 카드. 예전 8*min(1,on0/500) 처럼 500판에서
+   포화되면 500판 카드와 5,000판 카드가 같은 점수를 받으므로, 최다 카드 대비 비율로 쓴다. */
+const MAXON0 = (function(){ let mx=0; LIST.forEach(function(h){ const on=(h.m&&h.m.ron)?(h.m.ron[0]||0):0; if(on>mx) mx=on; }); return mx||1; })();
+let ON0RANK = null;
+function on0Rank(code){
+  if(!ON0RANK){
+    const arr = LIST.map(function(h){ return (h.m&&h.m.ron)?(h.m.ron[0]||0):0; }).sort(function(a,b){ return b-a; });
+    ON0RANK = {};
+    LIST.forEach(function(h){
+      const on = (h.m&&h.m.ron)?(h.m.ron[0]||0):0;
+      let r = 1; for(let i=0;i<arr.length;i++){ if(arr[i]>on) r++; else break; }
+      ON0RANK[h.code] = r;
+    });
+  }
+  return ON0RANK[code] || LIST.length;
+}
 function shrink(w,n,k){ k=k||60; return 100*(w + 0.5*k)/(n + k); }
 function mWin(code){ const m=H[code]&&H[code].m; if(!m||m.pun<20) return null; return shrink(m.puw,m.pun); }
 function mPlay(code){ const m=H[code]&&H[code].m; if(!m||m.pun<20) return null; return 100*m.puw/m.pun; }
@@ -1539,7 +1555,7 @@ function scorePick(code, opts){
   const idx = (step && step.t==='pick') ? step.i : 0;
 
   // ── 최근 3주 실전 지표 (가장 중요한 근거) ──
-  const rp=recentPickPct(h), rw=recentWin(h), rb=recentBanPct(h);
+  const rp=recentPickPct(h), rw=recentWin(h);   // 밴률은 1픽 추천에서 감점으로 쓰지 않는다
   if(rp>0){
     why.push({w:2.0, m:1, t:'최근 3주 실전 <b>픽률 '+pc(rp)+'%</b>'+(rw!=null?' · 승률 <b>'+pc(rw)+'%</b>':'')+' ('+(h.m?h.m.rpun:0)+'판)'});
   } else if(h.pick>0){
@@ -1568,19 +1584,30 @@ function scorePick(code, opts){
     else if(o.wr-50<=-3) why.push({w:-0.5, m:1, t:'실전 '+(idx+1)+'번째 픽 '+pc(o.wr)+'% ('+o.n+'판) — 이 자리에서는 약함'});
   }
 
-  // ── 1픽: 실제로 1픽에 자주 쓰이는 카드 + 잘리는 카드는 기대값 낮춤 ──
+  // ── 1픽: 실제 1픽 메타(물량·전용도·그 자리 승률)를 그대로 반영 ──
+  //    · 프리밴을 통과해 살아남은 카드를 밴률로 깎지 않는다 (contested 감점 제거)
+  //    · 물량 보너스는 500판에서 포화되지 않고, 최다 1픽 카드 대비 비율로 계산한다
   if(idx===0 && step && step.s==='my'){
     const m=h.m;
-    const on0 = (m && m.ron) ? m.ron[0] : 0;
-    sc += 8*Math.min(1, on0/500);
-    if(on0>=60){
-      const fw=100*m.row[0]/on0;
-      if(fw>=52) why.push({w:2.6, hot:1, m:1, t:'실전 1픽 <b>'+pc(fw)+'%</b> ('+on0+'판) — 첫 픽으로 실제 가장 많이 쓰이는 카드'});
+    const on0 = (m && m.ron) ? (m.ron[0]||0) : 0;
+    const ow0 = (m && m.row) ? (m.row[0]||0) : 0;
+    // (1) 1픽 물량 — 최다 카드(현재 5,500여 판) 대비 비율. 3,000~5,500판과 500판이 확실히 갈린다
+    const share = MAXON0 ? on0/MAXON0 : 0;
+    sc += 32*Math.pow(share, 0.62);
+    // (2) 1픽 전용도 — 그 카드가 나온 판 중 1픽으로 나간 비율 (1픽 전용 카드 vs 후픽 대응 카드)
+    const ded = (m && m.rpun) ? on0/m.rpun : 0;
+    sc += 8*Math.max(0, Math.min(1, (ded-0.2)/0.6));
+    // (3) 그 자리 승률 — 표본 300판 이상만
+    let fw1 = null;
+    if(on0>=300){
+      fw1 = 100*ow0/on0;
+      sc += Math.max(-3, Math.min(4, (fw1-50)*0.4))*Math.min(1, on0/400);
     }
-    const contested = Math.max(rb, h.ban||0);
-    if(contested>=15){
-      sc -= Math.min(12, contested*0.3);
-      why.push({w:-0.3, t:'밴·프리밴률 <b>'+fmt(contested)+'%</b> — 상대가 먼저 자르는 카드라 1픽으로 잡기 어렵습니다'});
+    // (4) 3주 1픽 150판 미만 카드는 1픽 추천에서 뒤로
+    if(on0>0 && on0<150) sc -= 6*(1-on0/150);
+    if(share>=0.20){
+      why.push({w:3.0+2.2*share, hot:share>=0.5?1:0, m:1,
+        t:'최근 3주 1픽 <b>'+on0.toLocaleString()+'판</b> · 1픽 사용 <b>'+on0Rank(code)+'위</b>'+(fw1!=null?' · 1픽 승률 '+pc(fw1)+'%':'')});
     }
   }
 
