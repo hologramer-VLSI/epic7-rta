@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#070a12">
-<title>에픽세븐 실레나 밴픽 v4.5.1 · VLSI 전적 맞춤</title>
+<title>에픽세븐 실레나 밴픽 v4.5.2 · VLSI 전적 맞춤</title>
 <style>
 :root{
   --bg:#070a12; --bg2:#0b1020; --panel:#0f1729; --panel2:#131f36;
@@ -608,6 +608,7 @@ button{font-family:inherit}
 .pb.good{color:#8ff0b8;border-color:#1e5b40;background:rgba(62,224,138,.12)}
 .pb.bad{color:#ffb3c0;border-color:#7c2a3a;background:rgba(255,77,104,.13)}
 .pb.mid{color:#a9c2ff;border-color:#2b4470;background:rgba(47,107,255,.10)}
+.pb.pair{color:#d3c2ff;border-color:#4b3a80;background:rgba(185,140,255,.14)}
 .pb.warn{color:#ffd45c;border-color:#7a5a1e;background:rgba(255,212,92,.12)}
 .pb.ace{color:#ffe6a3;border-color:#6d571d;background:linear-gradient(135deg,rgba(58,47,13,.9),rgba(36,29,7,.8))}
 .pwrap{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:4px}
@@ -853,7 +854,7 @@ button{font-family:inherit}
   <div class="top">
     <div class="brand">
       <div class="mark">⚔️</div>
-      <div><b>에픽세븐 실레나 밴픽<span class="vtag">v4.5.1</span></b><span id="subTitle">VLSI 맞춤 · 최신 실전</span></div>
+      <div><b>에픽세븐 실레나 밴픽<span class="vtag">v4.5.2</span></b><span id="subTitle">VLSI 맞춤 · 최신 실전</span></div>
     </div>
     <div class="spacer"></div>
     <span class="chip data" id="dataChip" title="실제 전적검색 전투 기록">🏆 실전 <b>—</b></span><span class="chip" id="seasonChip">2026 폴 · ss21</span>
@@ -1070,15 +1071,46 @@ const PLAYER = (function(){ try{ return JSON.parse(document.getElementById('play
 const playerStats = (PLAYER && PLAYER.playerStats) ? PLAYER.playerStats : null;
 const roleModel = (PLAYER && PLAYER.roleModel) ? PLAYER.roleModel : null;
 /* 내가 없는 영웅 기본 목록 — 코드를 넣어두면 앱을 처음 열 때 자동으로 '없는 영웅'으로 잡힙니다.
-   현재 기본값: 내가 없는 영웅 5명 (노토스·보검의 군주 이세리아·바니걸 명탐정 모로·살로메·파도의 균열 엘비라)
-   예) const DEFAULT_UNOWNED = ['c2181','c6024'];  (빈 배열이면 아무 것도 제외하지 않음) */
+   현재 기본값: 내가 없는 영웅 4명 (보검의 군주 이세리아·바니걸 명탐정 모로·살로메·파도의 균열 엘비라)
+   ※ 노토스(c2181)는 2026-11 안에 뽑기로 해서 기본 '보유'로 바꿨습니다(v4.5.2, 사용자 지시).
+   예) const DEFAULT_UNOWNED = ['c6024','c2187'];  (빈 배열이면 아무 것도 제외하지 않음) */
 const DEFAULT_UNOWNED = [
-  'c2181',  // 노토스
   'c6024',  // 보검의 군주 이세리아
   'c2187',  // 바니걸 명탐정 모로
   'c2184',  // 살로메
   'c2148'   // 파도의 균열 엘비라
 ];
+/* v4.5.2 : 예전 기본값 때문에 이미 '없는 영웅'으로 저장된 카드를 1회 되돌린다.
+   localStorage에는 예전 기본값이 그대로 남아 있으므로, 자동 적용 기록(e7rta.unownedApplied)에
+   남아 있는 카드만 골라 되돌리고, 사용자가 직접 만진 값은 건드리지 않는다. */
+const DEFAULT_OWNED_FIX = ['c2181'];   // 노토스 — 기본 보유 전환
+function migrateDefaultOwned(){
+  let done = false;
+  try{ done = localStorage.getItem('e7rta.ownedFix.v452') === '1'; }catch(e){ return; }
+  if(done) return;
+  try{
+    let applied = JSON.parse(localStorage.getItem('e7rta.unownedApplied') || '[]');
+    if(!Array.isArray(applied)) applied = [];
+    const j = JSON.parse(localStorage.getItem(KEY) || '{}');
+    let touched = false;
+    DEFAULT_OWNED_FIX.forEach(function(c){
+      if(applied.indexOf(c) < 0) return;              // 자동 적용된 적 없음 = 사용자가 정한 값 → 그대로 둔다
+      if(j.ownMode === 'owned'){                       // '보유만' 모드: 보유 목록에 되돌려 넣는다
+        if(!j.owned) j.owned = {};
+        if(!j.owned[c]){ j.owned[c] = 1; touched = true; }
+      } else if(j.missing && j.missing[c]){            // 기본 모드: 미보유 표시를 지운다
+        delete j.missing[c]; touched = true;
+      }
+      applied = applied.filter(function(x){ return x !== c; });
+      touched = true;
+    });
+    if(touched){
+      localStorage.setItem(KEY, JSON.stringify(j));
+      localStorage.setItem('e7rta.unownedApplied', JSON.stringify(applied));
+    }
+    localStorage.setItem('e7rta.ownedFix.v452', '1');
+  }catch(e){}
+}
 const EL = {fire:['화염','#ff6b4a'],ice:['냉기','#57c8ff'],wind:['자연','#3ee08a'],light:['빛','#ffd75e'],dark:['어둠','#b98cff']};
 const JOB = {warrior:'전사',knight:'기사',assassin:'도적',ranger:'사수',mage:'마법사',manauser:'정령사'};
 const H = {}, LIST = [];
@@ -1121,6 +1153,21 @@ const PAIR = {}, MU = {};
     h.pr = (MATCH.pre && MATCH.pre.hero) ? (MATCH.pre.hero[h.code]||0) : 0;
   });
 })();
+/* 랭커가 '두 장을 함께' 프리밴한 횟수 (MATCH.pre.pair) — 2번째 프리밴 추천의 짝꿍 신호.
+   예) 리제트+천칭 7,609회 · 리제트+리안나 4,402회 · 리제트+노토스 3,943회 · 지오+하르세티 2,690회 */
+const PREPAIR = {};
+(function(){
+  if(!MATCH || !MATCH.pre || !MATCH.pre.pair) return;
+  MATCH.pre.pair.forEach(function(p){
+    if(!p || !p[0] || !p[1] || !p[2]) return;
+    PREPAIR[p[0]+'|'+p[1]] = p[2];
+    PREPAIR[p[1]+'|'+p[0]] = p[2];
+  });
+})();
+function prePairN(a, b){
+  if(!a || !b || a===b) return 0;
+  return PREPAIR[a+'|'+b] || 0;
+}
 /* 픽순서별 물량 기준 — 최근 3주에서 i번째 픽이 가장 많은 카드.
    예전 8*min(1,on0/500) 처럼 500판에서 포화되면 500판 카드와 5,000판 카드가 같은 점수를 받으므로,
    최다 카드 대비 비율로 쓴다. (1픽뿐 아니라 2~5픽도 같은 방식) */
@@ -1240,6 +1287,7 @@ function applyDefaultUnowned(){
   try{ localStorage.setItem('e7rta.unownedApplied', JSON.stringify(applied.concat(pending))); }catch(e){}
 }
 function load(){
+  migrateDefaultOwned();
   try{
     const j = JSON.parse(localStorage.getItem(KEY)||'{}');
     if(j.missing) S.missing = j.missing;
@@ -1776,8 +1824,9 @@ function topCounters(code){
   TOP40.forEach(function(c){ if(c!==code && H[c].ctr.indexOf(code)>=0) n++; });
   return n;
 }
-function scorePreban(code){
+function scorePreban(code, opts){
   const h=H[code];
+  const partner = (opts && opts.partner) || null;   // 같은 팀 프리밴 반대 칸에 이미 넣은 카드
   const pr = h.pr||0;                       // 랭커가 실제로 프리밴한 비율(%)
   let sc = 4.6*Math.min(1, pr/90);          // 실전 프리밴이 가장 강한 신호
   const why=[];
@@ -1817,7 +1866,18 @@ function scorePreban(code){
       + (dt.cnt>1? ' · 내 주력 '+dt.cnt+'명을 동시에 잡는 카드' : '')});
   }
   if(fitB>0) sc += Math.min(5.5, fitB);
-  return {code:code, sc:sc, why:sortWhy(why)};
+  // ── v4.5.2 : 내 다른 프리밴 칸과 실제로 '같이' 잘린 짝꿍 조합 ──
+  //    랭커 프리밴 2인 조합 빈도(MATCH.pre.pair)를 6.4점까지 포화 가산.
+  //    짝 기록이 없는 카드는 개별 점수 그대로 — 혼자서도 잘리는 카드의 가치는 유지한다.
+  const pn = partner ? prePairN(partner, code) : 0;
+  if(pn > 0){
+    const pb = 6.4 * (1 - Math.exp(-pn/2600));
+    sc += pb;
+    const pname = H[partner] ? H[partner].name : partner;
+    why.push({w: pb>=3 ? 4.7 : 2.9, hot: pb>=3 ? 1 : 0, pair:1,
+      t:'<b>'+esc(pname)+'</b>'+josa(pname,'과','와').slice(pname.length)+' 함께 프리밴 짝꿍 <b>'+pn.toLocaleString()+'회</b> — 랭커가 두 장을 같이 자른 조합'});
+  }
+  return {code:code, sc:sc, why:sortWhy(why), pairN:pn, pairWith:partner};
 }
 function scoreBan(code, opts){
   const e=H[code]; let sc = value(e)*4; const why=[];
@@ -2024,13 +2084,19 @@ function upcomingMyPick(){
   for(let i=0;i<all.length;i++){ const st=all[i]; if(st.t==='pick'&&st.s==='my'&&!slotGet(st)) return st; }
   return null;
 }
+/* 내 프리밴에서 지금 고르는 칸의 '짝' — 반대 칸에 이미 넣어둔 카드 */
+function myPrePartner(step){
+  if(!step || step.t!=='pre' || step.s!=='my') return null;
+  return S.myPre[1-step.i] || null;
+}
 function computeRecs(){
   const ctx = recContext();
   const kind=ctx.kind, step=ctx.step||null;
   const opp = (kind==='oppPre'||kind==='oppPick');
   let arr=[];
   if(kind==='pre'){
-    arr = candidates({step:step, ignoreMissing:true}).map(h=>scorePreban(h.code));   // 프리밴은 내 미보유 카드도 상대 카드로 자를 수 있다
+    const partner = myPrePartner(step);   // 2번째 프리밴이면 1번째 프리밴, 그 반대도 동일
+    arr = candidates({step:step, ignoreMissing:true}).map(h=>scorePreban(h.code, {partner:partner}));   // 프리밴은 내 미보유 카드도 상대 카드로 자를 수 있다
   } else if(kind==='oppPre'){
     arr = candidates({step:step, ignoreMissing:true}).map(h=>scoreOppPre(h.code));
   } else if(kind==='ban'){
@@ -2041,7 +2107,8 @@ function computeRecs(){
     arr = candidates({step:step, ignoreMissing:true}).map(h=>scoreOppPick(h.code, step));
   }
   if(kind!=='ban') arr.sort((a,b)=>b.sc-a.sc);
-  return {kind:kind, label:ctx.label, step:step, arr:arr, opp:opp};
+  return {kind:kind, label:ctx.label, step:step, arr:arr, opp:opp,
+          prePartner:(kind==='pre' ? myPrePartner(step) : null)};
 }
 
 function banMini(rows, side){
@@ -2474,7 +2541,11 @@ function renderRecs(){
   $('recBadge').textContent = badges[rec.kind]||'추천';
   $('recBadge').className = 'badge'+(rec.opp?' opp':'');
   $('recCap').textContent = rec.opp ? '상대 기준 · 전체 영웅'
-    : (rec.kind==='pre' ? '내 프리밴 · 전체 '+LIST.length+'명' : '내 기준 · 보유 '+ownCount()+'명');
+    : (rec.kind==='pre'
+        ? (rec.prePartner && H[rec.prePartner]
+            ? esc(H[rec.prePartner].name)+' 짝꿍 조합 반영 · 전체 '+LIST.length+'명'
+            : '내 프리밴 · 전체 '+LIST.length+'명')
+        : '내 기준 · 보유 '+ownCount()+'명');
   renderFit();
   renderRmStrip(rec);
   const fsw = fireStatus();
@@ -2497,7 +2568,8 @@ function renderRecs(){
   $('recList').innerHTML = top.map(function(r,idx){ return recCard(r, idx, rec); }).join('') || '<div class="sub" style="padding:12px">조건에 맞는 후보가 없습니다.</div>';
   $('recCount').textContent = top.length+'명 / 후보 '+rec.arr.length+'명';
   if(rec.opp) $('recFoot').textContent = '상대 기준 · 전체 '+LIST.length+'명';
-  else if(rec.kind==='pre') $('recFoot').textContent = '프리밴은 전체 '+LIST.length+'명 기준 (내 미보유 포함)';
+  else if(rec.kind==='pre') $('recFoot').textContent = '프리밴은 전체 '+LIST.length+'명 기준 (내 미보유 포함)'
+    + (rec.prePartner ? ' · 다른 칸과 함께 잘린 랭커 조합 반영' : '');
   else $('recFoot').textContent = '내 보유 '+ownCount()+'명 · 내가 없는 영웅 '+missCount()+'명 제외';
 }
 function recCard(r, idx, rec){
@@ -2537,6 +2609,9 @@ function recCard(r, idx, rec){
           if(dt0 && dt0.cnt>=2) tg.push('<span class="pb bad">👤 내 주력 덱 카운터 '+dt0.cnt+'명</span>');
           else if(dt0) tg.push('<span class="pb mid">👤 내 주력 카운터</span>');
           if(rmPrebanN(h.code)>=30) tg.push('<span class="pb rm">🏅 롤모델 프리밴</span>');
+        }
+        if(rec && rec.kind==='pre' && r.pairN>0 && r.pairWith && H[r.pairWith]){
+          tg.push('<span class="pb pair">🔗 '+esc(H[r.pairWith].name)+' 짝꿍 '+r.pairN.toLocaleString()+'회</span>');
         }
         if(myTurn){
           const pb=playerBadge(h.code); if(pb) tg.push(pb);
