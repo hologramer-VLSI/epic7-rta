@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#070a12">
-<title>에픽세븐 실레나 밴픽 v4.4 · VLSI 전적 맞춤</title>
+<title>에픽세븐 실레나 밴픽 v4.5 · VLSI 전적 맞춤</title>
 <style>
 :root{
   --bg:#070a12; --bg2:#0b1020; --panel:#0f1729; --panel2:#131f36;
@@ -860,7 +860,7 @@ button{font-family:inherit}
   <div class="top">
     <div class="brand">
       <div class="mark">⚔️</div>
-      <div><b>에픽세븐 실레나 밴픽<span class="vtag">v4.4</span></b><span id="subTitle">VLSI 맞춤 · 최신 실전</span></div>
+      <div><b>에픽세븐 실레나 밴픽<span class="vtag">v4.5</span></b><span id="subTitle">VLSI 맞춤 · 최신 실전</span></div>
     </div>
     <div class="spacer"></div>
     <span class="chip data" id="dataChip" title="실제 전적검색 전투 기록">🏆 실전 <b>—</b></span><span class="chip" id="seasonChip">2026 폴 · ss21</span>
@@ -1130,9 +1130,24 @@ const PAIR = {}, MU = {};
     h.pr = (MATCH.pre && MATCH.pre.hero) ? (MATCH.pre.hero[h.code]||0) : 0;
   });
 })();
-/* 1픽 물량 기준 — 최근 3주 1픽 최다 카드. 예전 8*min(1,on0/500) 처럼 500판에서
-   포화되면 500판 카드와 5,000판 카드가 같은 점수를 받으므로, 최다 카드 대비 비율로 쓴다. */
-const MAXON0 = (function(){ let mx=0; LIST.forEach(function(h){ const on=(h.m&&h.m.ron)?(h.m.ron[0]||0):0; if(on>mx) mx=on; }); return mx||1; })();
+/* 픽순서별 물량 기준 — 최근 3주에서 i번째 픽이 가장 많은 카드.
+   예전 8*min(1,on0/500) 처럼 500판에서 포화되면 500판 카드와 5,000판 카드가 같은 점수를 받으므로,
+   최다 카드 대비 비율로 쓴다. (1픽뿐 아니라 2~5픽도 같은 방식) */
+const MAXON = (function(){
+  const out=[0,0,0,0,0];
+  LIST.forEach(function(h){ if(!h.m || !h.m.ron) return;
+    for(let i=0;i<5;i++){ const v=h.m.ron[i]||0; if(v>out[i]) out[i]=v; } });
+  return out;
+})();
+const MAXON0 = MAXON[0] || 1;
+/* 이 카드가 최근 3주에 '몇 번째 픽'으로 나오는지 — 그 자리 추천의 근거 */
+function pickOrderFit(code, idx){
+  const m = H[code] && H[code].m;
+  if(!m || !m.ron) return null;
+  const on = m.ron[idx] || 0;
+  const maxI = MAXON[idx] || 0;
+  return {on:on, share:maxI? on/maxI : 0, ded:(m.rpun? on/m.rpun : 0), thin:!!(m.rpun>=200 && on<30)};
+}
 let ON0RANK = null;
 function on0Rank(code){
   if(!ON0RANK){
@@ -1393,7 +1408,9 @@ function aceInfo(code){
   }
   const ci = myCore().indexOf(code);
   if(ci>=0 && ci<5){ bonus += 1.6; if(!why) why = '내가 가장 많이 쓰는 카드'; top = true; }
-  if(isFire) bonus += 1.8;
+  // 딜러 가산은 위 '딜러 확보' 항이 이미 준다 — 여기서 또 주면 3픽이 딜러 전용 목록이 된다.
+  // 3픽은 '밴가드' 자리이므로, 내가 실제로 이기는(내 전적 55%+) 딜러는 이 자리에 세운다
+  if(isFire && ps && ps.n>=5 && ps.wr!=null && ps.wr>=55) bonus += 2.2;
   if(!bonus && h.rank<=12 && isFire){ bonus = 2.2; why = '랭커 메타 상위 딜러'; }
   if(bonus<=0) return null;
   return {bonus:Math.min(8.6, bonus), fire:isFire, wr:(ps?ps.wr:null), n:(ps?ps.n:0), why:why, top:top};
@@ -1568,8 +1585,8 @@ function scorePick(code, opts){
   const _pt = patOf(code);
   if(_pt && _pt.post){
     const pp=_pt.post.pick||0, pw=_pt.post.win, pn=_pt.post.n||0;
-    if(pn>=40){
-      sc += 9*Math.min(1, pp/8.5) + 3*Math.max(0, Math.min(1, (pp-(_pt.pre.pick||0))/4));
+    if(pn>=60){
+      sc += 6*Math.min(1, pp/10) + 2*Math.max(0, Math.min(1, (pp-(_pt.pre.pick||0))/4));
       why.push({w:1.6, pat:1, t:'<b>11/19 상향</b> — 패치 후 픽률 <b>'+pc(pp)+'%</b>'+(pw!=null?' · 승률 '+pc(pw)+'%':'')+' ('+pn+'판)'});
     } else if(pn>0){
       why.push({w:0.4, pat:1, t:'11/19 상향 대상 — 패치 후 표본 '+pn+'판'});
@@ -1584,30 +1601,23 @@ function scorePick(code, opts){
     else if(o.wr-50<=-3) why.push({w:-0.5, m:1, t:'실전 '+(idx+1)+'번째 픽 '+pc(o.wr)+'% ('+o.n+'판) — 이 자리에서는 약함'});
   }
 
-  // ── 1픽: 실제 1픽 메타(물량·전용도·그 자리 승률)를 그대로 반영 ──
-  //    · 프리밴을 통과해 살아남은 카드를 밴률로 깎지 않는다 (contested 감점 제거)
-  //    · 물량 보너스는 500판에서 포화되지 않고, 최다 1픽 카드 대비 비율로 계산한다
-  if(idx===0 && step && step.s==='my'){
-    const m=h.m;
-    const on0 = (m && m.ron) ? (m.ron[0]||0) : 0;
-    const ow0 = (m && m.row) ? (m.row[0]||0) : 0;
-    // (1) 1픽 물량 — 최다 카드(현재 5,500여 판) 대비 비율. 3,000~5,500판과 500판이 확실히 갈린다
-    const share = MAXON0 ? on0/MAXON0 : 0;
-    sc += 32*Math.pow(share, 0.62);
-    // (2) 1픽 전용도 — 그 카드가 나온 판 중 1픽으로 나간 비율 (1픽 전용 카드 vs 후픽 대응 카드)
-    const ded = (m && m.rpun) ? on0/m.rpun : 0;
-    sc += 8*Math.max(0, Math.min(1, (ded-0.2)/0.6));
-    // (3) 그 자리 승률 — 표본 300판 이상만
-    let fw1 = null;
-    if(on0>=300){
-      fw1 = 100*ow0/on0;
-      sc += Math.max(-3, Math.min(4, (fw1-50)*0.4))*Math.min(1, on0/400);
-    }
-    // (4) 3주 1픽 150판 미만 카드는 1픽 추천에서 뒤로
-    if(on0>0 && on0<150) sc -= 6*(1-on0/150);
-    if(share>=0.20){
-      why.push({w:3.0+2.2*share, hot:share>=0.5?1:0, m:1,
-        t:'최근 3주 1픽 <b>'+on0.toLocaleString()+'판</b> · 1픽 사용 <b>'+on0Rank(code)+'위</b>'+(fw1!=null?' · 1픽 승률 '+pc(fw1)+'%':'')});
+  // ── 이 자리(1~5픽)에서 실제로 나오는 카드인가 — 최근 3주 픽순서 분포 ──
+  //    · 1픽은 물량 편차가 가장 커서 가중치를 크게, 2~5픽은 중간 크기로 준다
+  //    · 프리밴을 통과해 살아남은 카드를 밴률로 깎지 않는다 (contested 감점 없음)
+  //    · 그 자리 승률은 아래 slotStat 항이 이미 반영한다 (여기서 또 더하면 이중 계산)
+  const po = (step && step.t==='pick' && step.s==='my') ? pickOrderFit(code, idx) : null;
+  if(po){
+    const scale = idx===0 ? 32 : 18;
+    sc += scale*Math.pow(po.share, 0.65);
+    sc += (scale*0.25)*Math.max(0, Math.min(1, (po.ded-0.2)/0.6));
+    if(idx===0){ if(po.on>0 && po.on<150) sc -= 6*(1-po.on/150); }
+    else if(po.thin) sc -= 4*(1-po.on/30);
+    if(idx===0 && po.share>=0.20){
+      const fw1 = (po.on>=300 && h.m && h.m.row) ? 100*h.m.row[0]/po.on : null;
+      why.push({w:3.0+2.2*po.share, hot:po.share>=0.5?1:0, m:1,
+        t:'최근 3주 1픽 <b>'+po.on.toLocaleString()+'판</b> · 1픽 사용 <b>'+on0Rank(code)+'위</b>'+(fw1!=null?' · 1픽 승률 '+pc(fw1)+'%':'')});
+    } else if(idx>=1 && po.share>=0.42){
+      why.push({w:2.2, m:1, t:'최근 3주 '+(idx+1)+'번째 픽 <b>'+po.on.toLocaleString()+'판</b> — 이 자리에서 실제로 많이 쓰이는 카드'});
     }
   }
 
@@ -1678,15 +1688,14 @@ function scorePick(code, opts){
   // ── v4.3 : 내 계정 실제 승률 보정 (VLSI, 표본 5판 이상) ──
   const psFit = (fitOn() && st && st.t==='pick' && st.s==='my') ? pStat(code) : null;
   if(psFit && psFit.n>=5 && psFit.wr!=null){
-    const w8 = Math.min(1, psFit.n/14);
-    let b = 0;
-    if(psFit.wr>=55) b = Math.min(7.0, (0.85*(psFit.wr-50) + 0.05*psFit.n) * w8);
-    else if(psFit.wr<40) b = -Math.min(7.5, 0.95*(50-psFit.wr) * Math.min(1, psFit.n/12));
-    else b = 0.22*(psFit.wr-50);
+    // 5~10판짜리 표본의 승률이 픽 순위를 뒤집지 않도록 50% 쪽으로 축소한 추정치를 쓴다
+    const w8 = Math.min(1, psFit.n/16);
+    const adj = 50 + (psFit.wr-50) * (psFit.n/(psFit.n+12));
+    const b = Math.max(-5, Math.min(5, (adj-50)*0.75*w8));
     sc += b;
-    if(b>0) why.push({w:4.4, hot:1, fit:1, t:'내 전적 <b>'+fmtPct(psFit.wr)+'%</b> ('+psFit.n+'판) — 내 손에서 실제로 이기는 카드'});
-    else if(b<0) why.push({w:0.5, fit:1, warn:1, t:'내 전적 저조 <b>'+fmtPct(psFit.wr)+'%</b> ('+psFit.n+'판) — 실제로 계속 지고 있는 함정 픽'});
-    else why.push({w:1.7, fit:1, t:'내 전적 '+fmtPct(psFit.wr)+'% ('+psFit.n+'판)'});
+    if(b>=1.5) why.push({w:3.6, hot:1, fit:1, t:'내 전적 <b>'+fmtPct(psFit.wr)+'%</b> ('+psFit.n+'판) — 내 손에서 실제로 이기는 카드'});
+    else if(b<=-1.5) why.push({w:1.2, fit:1, warn:1, t:'내 전적 저조 <b>'+fmtPct(psFit.wr)+'%</b> ('+psFit.n+'판) — 실제로 계속 지고 있는 함정 픽'});
+    else if(psFit.n>=10) why.push({w:1.5, fit:1, t:'내 전적 '+fmtPct(psFit.wr)+'% ('+psFit.n+'판)'});
   }
   // ── v4.3 : 롤모델(VLSI형 레전드 고수) 고승률 동반 조합 ──
   let rmHit = false;
@@ -1721,9 +1730,9 @@ function scorePick(code, opts){
     if(fireOf(h)){
       needFire = true;
       sc += 8.0 + 2.4*Math.min(2, fst.deficit);
-      why.push({w:5.0, hot:1, fire:1, t:'<b>딜러 확보 필수</b> — 1픽이 밴당해도 화력을 유지하려면 딜러/브루저가 더 필요합니다'});
+      why.push({w:4.4, hot:1, fire:1, t:'<b>딜러 확보</b> — 1픽이 밴당해도 화력을 유지하려면 딜러/브루저가 한 명 더 필요합니다'});
     } else {
-      sc -= (roleOf(h)==='탱' || roleOf(h)==='힐') ? 7.5 : 3.0;
+      sc -= (roleOf(h)==='탱' || roleOf(h)==='힐') ? 6.0 : 2.5;
       why.push({w:0.6, t:'지금은 탱·서폿보다 <b>딜러/브루저</b>가 급합니다'});
     }
   }
@@ -1879,6 +1888,16 @@ function scoreOppPick(code, step){
   if(rp>0) why.push({w:1.8, m:1, t:'최근 실전 픽률 <b>'+pc(rp)+'%</b>'+(rw!=null?' · 승률 '+pc(rw)+'%':'')+' ('+(h.m?h.m.rpun:0)+'판)'});
   else if(h.pick>0) why.push({w:1.2, t:'<b>'+statLine(h)+'</b>'});
 
+  // 상대도 그 자리에서 실제로 쓰는 카드를 노린다 (같은 픽순서 분포, 위험도 맥락이라 가중치는 낮게)
+  if(step && step.t==='pick'){
+    const po2 = pickOrderFit(code, idx);
+    if(po2){
+      const scale2 = idx===0 ? 14 : 9;
+      sc += scale2*Math.pow(po2.share, 0.65) + (scale2*0.25)*Math.max(0, Math.min(1, (po2.ded-0.2)/0.6));
+      if(po2.thin) sc -= 3*(1-po2.on/30);
+      if(po2.share>=0.35) why.push({w:2.6, m:1, t:'최근 3주 '+(idx+1)+'번째 픽 <b>'+po2.on.toLocaleString()+'판</b> — 상대가 이 자리에서 실제로 쓰는 카드'});
+    }
+  }
   const o = slotStat(code, idx, true) || slotStat(code, idx, false);
   if(o && o.n>=15){
     const d=o.wr-50;
