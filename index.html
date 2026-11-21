@@ -1813,17 +1813,20 @@ function scorePreban(code){
   if(rw!=null) sc += 1.2*winAdj(rw);
   sc += 0.5*normBan(h.ban,h.pick);
   // ── v4.3 : 내 주력 덱을 실제로 잡는 카운터 (내 전적 맞춤) ──
+  //    두 신호(주력 덱 위협 + 롤모델 프리밴)가 겹쳐도 합계 5.5점까지만 — 메타 신호를 덮지 않게
   const rmn = rmPrebanN(code);
+  const dt = deckThreat(code);
+  let fitB = 0;
   if(fitOn() && rmn>=30){
-    sc += Math.min(2.6, rmn/60);
+    fitB += Math.min(2.6, rmn/60);
     why.push({w:4.6, hot:1, fit:1, rm:1, t:'<b>롤모델 프리밴</b> · VLSI형 레전드 고수가 가장 많이 함께 자르는 카드 ('+rmn+'회)'});
   }
-  const dt = deckThreat(code);
   if(dt){
-    sc += dt.bonus;
+    fitB += dt.bonus;
     why.push({w:4.8, hot:1, fit:1, t:'<b>내 주력 덱 위협</b> — <b>'+esc(dt.best.name)+'</b> '+dt.best.t
       + (dt.cnt>1? ' · 내 주력 '+dt.cnt+'명을 동시에 잡는 카드' : '')});
   }
+  if(fitB>0) sc += Math.min(5.5, fitB);
   return {code:code, sc:sc, why:sortWhy(why)};
 }
 function scoreBan(code, opts){
