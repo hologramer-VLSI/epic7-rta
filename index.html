@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#070a12">
-<title>에픽세븐 실레나 밴픽 v4.5 · VLSI 전적 맞춤</title>
+<title>에픽세븐 실레나 밴픽 v4.5.1 · VLSI 전적 맞춤</title>
 <style>
 :root{
   --bg:#070a12; --bg2:#0b1020; --panel:#0f1729; --panel2:#131f36;
@@ -184,7 +184,6 @@ button{font-family:inherit}
 .rc.opp.top1::before{background:linear-gradient(180deg,#ff8095,#7c2a3a)}
 .rc.opp.top1 .rank{color:#ffb3c0}
 .tg.risk{background:rgba(255,77,104,.16);color:#ffb3c0;border-color:rgba(255,77,104,.38)}
-.recHint{font-size:10.5px;color:var(--sub);line-height:1.4}
 .reclist{padding:7px;display:flex;flex-direction:column;gap:6px;flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain}
 .reclist>.rc,.reclist>div{flex:0 0 auto}
 .rc{
@@ -602,11 +601,6 @@ button{font-family:inherit}
 .top .btn.fit.on{border-color:#2f7a55;background:linear-gradient(135deg,#0f2b20,#0d2318);color:#b8f5d3;box-shadow:0 0 0 1px rgba(62,224,138,.22) inset}
 .top .btn.fit .st{font-size:9px;font-weight:900;padding:1px 5px;border-radius:5px;background:#0b1526;border:1px solid #2b4470;color:#8fa3c2;margin-left:2px}
 .top .btn.fit.on .st{background:#0c2318;border-color:#1e5b40;color:#8ff0b8}
-.fitBar{display:block;font-size:9.5px;line-height:1.5;color:#9aabc9;
-  padding:5px 8px;border:1px solid #1e5b40;border-radius:8px;background:linear-gradient(90deg,rgba(12,35,24,.75),rgba(10,19,34,.6));margin-top:5px}
-.fitBar b{color:#b8f5d3}
-.fitBar.off{border-color:#2b4470;background:linear-gradient(90deg,rgba(17,28,48,.8),rgba(10,19,34,.6))}
-.fitBar.off b{color:#9fc6ff}
 .dealerWarn{display:block;font-size:9.5px;line-height:1.5;color:#ffe0b0;
   padding:5px 8px;border:1px solid #7a5a1e;border-radius:8px;background:linear-gradient(90deg,rgba(60,42,10,.75),rgba(24,17,8,.6));margin-top:5px}
 .dealerWarn b{color:#ffd45c}
@@ -624,7 +618,7 @@ button{font-family:inherit}
 .pcell.good{border-color:#1e5b40;background:#0c2318}.pcell.good span{color:#8ff0b8}
 .pcell.bad{border-color:#5c2431;background:#1a0f14}.pcell.bad span{color:#ffb3c0}
 @media (max-width:920px){
-  .fitBar,.dealerWarn{font-size:9px;padding:4px 7px}
+  .dealerWarn{font-size:9px;padding:4px 7px}
   .pwrap{grid-template-columns:repeat(auto-fill,minmax(116px,1fr))}
 }
 .rmList{display:grid;gap:4px}
@@ -776,7 +770,6 @@ button{font-family:inherit}
 
   /* ── 추천 탭 ─────────────────────────────────────────── */
   .recHead{padding:9px 10px 10px}
-  .recHint{font-size:10.5px;line-height:1.45}
   .reclist{padding:7px;gap:7px}
   .rc{padding:9px 10px 10px;gap:6px}
   .rc .r1{grid-template-columns:18px 46px minmax(0,1fr);gap:8px}
@@ -860,7 +853,7 @@ button{font-family:inherit}
   <div class="top">
     <div class="brand">
       <div class="mark">⚔️</div>
-      <div><b>에픽세븐 실레나 밴픽<span class="vtag">v4.5</span></b><span id="subTitle">VLSI 맞춤 · 최신 실전</span></div>
+      <div><b>에픽세븐 실레나 밴픽<span class="vtag">v4.5.1</span></b><span id="subTitle">VLSI 맞춤 · 최신 실전</span></div>
     </div>
     <div class="spacer"></div>
     <span class="chip data" id="dataChip" title="실제 전적검색 전투 기록">🏆 실전 <b>—</b></span><span class="chip" id="seasonChip">2026 폴 · ss21</span>
@@ -883,14 +876,12 @@ button{font-family:inherit}
     <aside class="col left">
       <section class="panel" style="display:flex;flex-direction:column;flex:1;min-height:0">
         <div class="phead">
-          <h2 id="recTitle">미리 밴 추천</h2>
-          <span class="badge" id="recBadge">내 미리 밴</span>
+          <h2 id="recTitle">프리밴 추천</h2>
+          <span class="badge" id="recBadge">내 프리밴</span>
           <div class="spacer"></div>
           <span class="sub" id="recCap"></span>
         </div>
-        <div class="recHead">
-          <div class="recHint" id="recHint">상대가 실제로 가장 많이 자른 카드부터 보여줍니다.</div>
-          <div class="fitBar" id="fitBar"></div>
+        <div class="recHead" id="recHead" style="display:none">
           <div class="dealerWarn" id="dealerWarn" style="display:none"></div>
           <div class="rmStrip" id="rmStrip" style="display:none"></div>
         </div>
@@ -907,7 +898,7 @@ button{font-family:inherit}
             <button data-first="me" class="on">선픽</button>
             <button data-first="opp">후픽</button>
           </div>
-          <span class="chip" id="phaseChip">미리 밴</span>
+          <span class="chip" id="phaseChip">프리밴</span>
           <div class="spacer"></div>
           <span class="sub hideSm" id="boardNote">칸을 누르면 고치기 · 영웅을 누르면 들어감</span>
         </div>
@@ -916,7 +907,7 @@ button{font-family:inherit}
           <div class="side blue" id="sideMy">
             <div class="sideHead"><span style="color:#7fb0ff">●</span> 내 팀 <span class="tag" id="myRoleTag">BLUE</span><div class="spacer"></div><span class="sub" id="myPickTag"></span></div>
             <div>
-              <div class="banRowLabel">내 미리 밴</div>
+              <div class="banRowLabel">내 프리밴</div>
               <div class="banRow" id="myPreBox"></div>
             </div>
             <div class="picks" id="myPickBox" style="display:grid;grid-auto-rows:1fr;gap:7px;flex:1;min-height:0"></div>
@@ -924,14 +915,14 @@ button{font-family:inherit}
 
           <div class="stage">
             <div class="vs">V<b>S</b></div>
-            <div class="stageNow" id="stageNow">내 미리 밴<small>1번째</small></div>
+            <div class="stageNow" id="stageNow">내 프리밴<small>1번째</small></div>
             <ol class="rail" id="rail"></ol>
           </div>
 
           <div class="side red" id="sideOpp">
             <div class="sideHead"><span style="color:#ff8095">●</span> 상대 팀 <span class="tag">RED</span><div class="spacer"></div><span class="sub" id="oppPickTag"></span></div>
             <div>
-              <div class="banRowLabel">상대 미리 밴</div>
+              <div class="banRowLabel">상대 프리밴</div>
               <div class="banRow" id="oppPreBox"></div>
             </div>
             <div class="picks" id="oppPickBox" style="display:grid;grid-auto-rows:1fr;gap:7px;flex:1;min-height:0"></div>
@@ -940,7 +931,7 @@ button{font-family:inherit}
 
         <div class="comp" id="comp"></div>
         <div class="strip" id="strip">
-          <span class="msg" id="stripMsg">준비됐습니다 — <b>내 미리 밴</b>을 골라주세요.</span>
+          <span class="msg" id="stripMsg">준비됐습니다 — <b>내 프리밴</b>을 골라주세요.</span>
           <div class="spacer"></div>
           <button class="btn" id="stripClear">비우기</button>
           <button class="btn pri" id="stripDone">선택 완료</button>
@@ -996,7 +987,7 @@ button{font-family:inherit}
         <dt>시즌</dt><dd id="iSeason"></dd>
         <dt>데이터</dt><dd id="iData"></dd>
         <dt>통합 방식</dt><dd>마스터 50% · 챔피언 30% · 레전드 20% 가중 평균 (미집계 등급은 제외 후 재정규화). 픽률·승률·밴률 모두 공식 gg 실측값.</dd>
-        <dt>밴픽 규칙</dt><dd>미리 밴 각 2명 → 선픽 1 → 후픽 2 → 선픽 2 → 후픽 2 → 선픽 2 → 후픽 1 (총 5:5) → <b>3픽은 밴가드(최종 밴 면제)</b> → 서로 1명 최종 밴 → 4:4. 최종 밴 추천은 <b>3픽만 고정</b>하고 나머지 4명을 조합(집합)으로 비교하므로 픽 순서가 달라도 결과가 같습니다.<br><b>미리 밴 중복</b>: 같은 팀 두 칸은 서로 다른 영웅이어야 하고, <b>내 미리 밴과 상대 미리 밴은 같은 영웅이어도 됩니다</b>. 미리 밴된 영웅은 양 팀 모두 1~5픽에서 선택할 수 없습니다.</dd>
+        <dt>밴픽 규칙</dt><dd>프리밴 각 2명 → 선픽 1 → 후픽 2 → 선픽 2 → 후픽 2 → 선픽 2 → 후픽 1 (총 5:5) → <b>3픽은 밴가드(최종 밴 면제)</b> → 서로 1명 최종 밴 → 4:4. 최종 밴 추천은 <b>3픽만 고정</b>하고 나머지 4명을 조합(집합)으로 비교하므로 픽 순서가 달라도 결과가 같습니다.<br><b>프리밴 중복</b>: 같은 팀 두 칸은 서로 다른 영웅이어야 하고, <b>내 프리밴과 상대 프리밴은 같은 영웅이어도 됩니다</b>. 프리밴된 영웅은 양 팀 모두 1~5픽에서 선택할 수 없습니다.</dd>
         <dt>자동 갱신</dt><dd>브라우저에서는 공식 API 응답을 읽을 수 없습니다(CORS 허용 출처가 epic7.onstove.com 뿐). 그래서 <b>① 열 때마다 실시간 호출을 시도</b>(결과를 위 목록에 그대로 표시) <b>② 프록시를 켜면 실시간</b> <b>③ 평소에는 서버측 새로고침 스크립트가 매일 06:00에 이 파일의 스냅샷을 갱신</b>합니다. 새 시즌·신규 영웅도 그때 자동 반영됩니다.</dd>
         <dt>내 전적 맞춤</dt><dd>VLSI(한국) 최근 <b>68판 실제 전적</b>을 내장했습니다. 내 픽 추천 점수에 <b>내 계정 승률</b>을 반영하며(표본 5판 이상, 승률 55%+ 가산 · 40% 미만 감산), 카드에 ‘내 전적 60% (10판)’ · ‘내 전적 저조 32% 주의’ 배지가 붙습니다. <b>3픽(밴가드)</b>에는 내 에이스 딜러를 우선 추천하고, <b>4·5픽</b>에는 1픽이 밴당해도 딜러/브루저가 2명 남도록 ‘딜러 확보 필수’ 보정을 넣습니다. 헤더의 <b>👤 내 전적 맞춤 (VLSI)</b> 버튼으로 끄면 랭커 메타만 사용합니다.</dd>
         <dt>기믹 태그</dt><dd>공식 영웅 스킬 설명(epic7db)에서 뽑은 태그. 추천 이유의 상성 판단에 사용합니다.</dd>
@@ -1472,14 +1463,13 @@ function renderFit(){
   const b = $('btnFit'), st = $('fitSt');
   if(b){ b.classList.toggle('on', fitOn()); b.classList.toggle('off', !fitOn()); }
   if(st) st.textContent = fitOn() ? 'ON' : 'OFF';
-  const bar = $('fitBar'); if(!bar) return;
-  if(!playerStats){ bar.style.display = 'none'; return; }
-  const p = playerStats;
-  bar.style.display = '';
-  bar.className = 'fitBar' + (fitOn() ? '' : ' off');
-  bar.innerHTML = fitOn()
-    ? '<b>👤 VLSI 맞춤 ON</b> · 최근 '+p.battles+'판 '+p.wins+'승 '+p.losses+'패('+fmtPct(p.wr)+'%) 승률 + 롤모델 고수 '+rmModels().length+'명의 고승률 조합 반영 · <a class="lnkfin" data-fit="1">끄기</a>'
-    : '<b>👤 VLSI 맞춤 OFF</b> · 랭커 메타만 반영 중 · <a class="lnkfin" data-fit="1">켜기</a>';
+}
+/* 추천 탭 상단 안내 영역 — 경고·롤모델 스트립이 보일 때만 자리를 차지한다 */
+function syncRecHead(){
+  const h = $('recHead'); if(!h) return;
+  const w = $('dealerWarn'), r = $('rmStrip');
+  const any = (w && w.style.display !== 'none') || (r && r.style.display !== 'none');
+  h.style.display = any ? '' : 'none';
 }
 
 /* ---------------- scoring ---------------- */
@@ -2025,7 +2015,7 @@ function recContext(){
   const a = activeStep();
   if(!a) return {kind:'done'};
   if(a.t==='ban') return {kind:'ban', step:a, label:a.s==='my'?'내 최종 밴':'상대 최종 밴'};
-  if(a.t==='pre') return a.s==='my' ? {kind:'pre', step:a} : {kind:'oppPre', step:a, label:'상대가 미리 밴할 카드'};
+  if(a.t==='pre') return a.s==='my' ? {kind:'pre', step:a} : {kind:'oppPre', step:a, label:'상대가 프리밴할 카드'};
   if(a.t==='pick') return a.s==='my' ? {kind:'pick', step:a} : {kind:'oppPick', step:a, label:'상대가 노릴 픽'};
   return {kind:'done'};
 }
@@ -2098,9 +2088,9 @@ function renderBanPanel(rec){
   $('recBadge').textContent = side==='my' ? '내 최종 밴' : '상대 최종 밴 예상';
   $('recBadge').className = 'badge '+(side==='my'?'gold':'opp');
   $('recCap').textContent = '3픽(밴가드) 제외 · 4명 비교';
-  $('recHint').innerHTML = side==='my'
-    ? '내 3픽만 빼고, 상대 1·2·4·5픽 4명을 <b>조합 그대로</b> 비교한 결과입니다. 1순위를 밴하면 내 예상 승률이 가장 높아집니다.'
-    : '상대 차례입니다. 상대가 밴할 만한 <b>내 카드</b>를 위험한 순서로 보여줍니다. 실제로 잘린 카드를 눌러 기록하세요.';
+  const dwB = $('dealerWarn'); if(dwB) dwB.style.display = 'none';
+  const rmB = $('rmStrip'); if(rmB) rmB.style.display = 'none';
+  syncRecHead();
   if(!main.length){
     $('recList').innerHTML = '<div class="sub" style="padding:10px">5:5 픽이 모두 끝나야 계산됩니다.</div>';
     $('recCount').textContent=''; $('recFoot').textContent=''; return;
@@ -2344,9 +2334,9 @@ function renderBoard(){
   let now='밴픽 끝', sub='4:4 전투 준비';
   if(st){
     if(st.t==='pre'){
-      now = st.s==='my' ? '내 미리 밴' : '상대 미리 밴';
-      sub = '내 미리 밴 '+(st.i+1)+'/2';
-      if(st.s==='opp') sub='상대 미리 밴 '+(st.i+1)+'/2';
+      now = st.s==='my' ? '내 프리밴' : '상대 프리밴';
+      sub = '내 프리밴 '+(st.i+1)+'/2';
+      if(st.s==='opp') sub='상대 프리밴 '+(st.i+1)+'/2';
     } else if(st.t==='pick'){
       now = (st.s==='my'?'내 ':'상대 ')+(st.i+1)+'픽';
       sub = st.i===2 ? (st.s==='my'?'밴가드 자리':'상대 3픽 = 밴가드') : pickOrderText(st.i);
@@ -2356,7 +2346,7 @@ function renderBoard(){
     }
   }
   $('stageNow').innerHTML = esc(now)+'<small>'+esc(sub)+'</small>';
-  $('phaseChip').textContent = st ? (st.t==='pre'?'미리 밴':st.t==='pick'?'픽':'최종 밴') : '끝';
+  $('phaseChip').textContent = st ? (st.t==='pre'?'프리밴':st.t==='pick'?'픽':'최종 밴') : '끝';
   const seq=pickSeq();
   let rail='';
   let drawn={my:0,opp:0};
@@ -2419,11 +2409,11 @@ function renderAnalysis(){
   if(!a) tip='밴픽이 끝났습니다 — 최종 4:4 조합과 예상 승률을 확인하세요.';
   else if(a.t==='ban' && a.s==='my') tip='최종 밴은 <b>밴률 1위</b>가 아니라 <b>내 조합을 가장 흔들어 놓는 1명</b>입니다. 3픽은 밴가드라 제외됩니다.';
   else if(a.t==='ban') tip='상대의 최종 밴을 기록하는 단계입니다. 왼쪽 위험 순위를 보고, 실제로 잘린 내 영웅을 눌러주세요.';
-  else if(a.t==='pre' && a.s==='opp') tip='지금은 <b>상대 미리 밴</b> 차례입니다. 왼쪽은 상대가 자를 만한 카드이고, 실제 밴은 오른쪽에서 기록하세요.';
+  else if(a.t==='pre' && a.s==='opp') tip='지금은 <b>상대 프리밴</b> 차례입니다. 왼쪽은 상대가 자를 만한 카드이고, 실제 밴은 오른쪽에서 기록하세요.';
   else if(a.t==='pick' && a.s==='opp') tip='지금은 <b>상대 픽</b> 차례입니다. 왼쪽은 내 픽 기준으로 상대가 노릴 카드입니다.';
   else if(a.t==='pick' && a.i===2) tip='지금 픽은 <b>밴가드(3픽)</b> — 상대 최종 밴에서 지켜지니 조합 핵심을 넣기 좋은 자리입니다.';
   else if(a.t==='pick') tip='<b>내 픽</b> 차례 — 왼쪽 추천은 최근 실전 지표 + 상대 상성 + 내 조합 시너지 기준입니다.';
-  else if(a.t==='pre') tip='<b>내 미리 밴</b> 차례 — 상대가 잘 쓰는 카드를 먼저 자릅니다. 두 칸은 서로 달라야 합니다.';
+  else if(a.t==='pre') tip='<b>내 프리밴</b> 차례 — 상대가 잘 쓰는 카드를 먼저 자릅니다. 두 칸은 서로 달라야 합니다.';
   if(tip) html+='<div class="anRow"><b>안내</b><div class="v">'+tip+'</div></div>';
   body.innerHTML=html;
 }
@@ -2460,11 +2450,11 @@ function renderStrip(){
   } else if(a.t==='ban'){
     msg='<b>상대 최종 밴</b> — 상대가 실제로 밴한 내 영웅을 눌러 기록하세요. 위험 순위는 왼쪽에 있습니다.';
   } else if(a.t==='pre' && a.s==='opp'){
-    msg='<b>상대 미리 밴</b> — 왼쪽은 상대가 자를 만한 카드입니다. 실제 밴을 오른쪽에서 기록하세요. 내 미리 밴과 겹쳐도 됩니다.';
+    msg='<b>상대 프리밴</b> — 왼쪽은 상대가 자를 만한 카드입니다. 실제 밴을 오른쪽에서 기록하세요. 내 프리밴과 겹쳐도 됩니다.';
   } else if(a.t==='pick' && a.s==='opp'){
     msg='<b>상대 '+(a.i+1)+'픽</b> — 왼쪽은 상대가 노릴 카드입니다. 상대가 고른 영웅을 오른쪽에서 누르면 다음 추천이 정확해집니다.';
   } else if(a.t==='pre'){
-    msg='<b>내 미리 밴</b> — 상대가 잘 쓰는 카드를 2명까지 자릅니다. 내 두 칸은 서로 달라야 합니다.';
+    msg='<b>내 프리밴</b> — 상대가 잘 쓰는 카드를 2명까지 자릅니다. 내 두 칸은 서로 달라야 합니다.';
   } else {
     msg='<b>내 '+(a.i+1)+'픽</b> — 왼쪽 추천을 누르거나 오른쪽에서 고르세요.';
   }
@@ -2478,24 +2468,13 @@ function renderRecs(){
   const rec = computeRecs();
   RECS=rec;
   if(rec.kind==='ban'){ renderBanPanel(rec); return; }
-  const titles = {pre:'미리 밴 추천', pick:'내 픽 추천', oppPre:'상대 미리 밴 예상', oppPick:'상대가 노릴 픽', done:'실시간 추천'};
-  const badges = {pre:'내 미리 밴', pick:'내 픽', oppPre:'상대 미리 밴(예상)', oppPick:'상대 픽(예상)', done:'밴픽 끝'};
+  const titles = {pre:'프리밴 추천', pick:'내 픽 추천', oppPre:'상대 프리밴 예상', oppPick:'상대가 노릴 픽', done:'실시간 추천'};
+  const badges = {pre:'내 프리밴', pick:'내 픽', oppPre:'상대 프리밴(예상)', oppPick:'상대 픽(예상)', done:'밴픽 끝'};
   $('recTitle').textContent = titles[rec.kind]||'실시간 추천';
   $('recBadge').textContent = badges[rec.kind]||'추천';
   $('recBadge').className = 'badge'+(rec.opp?' opp':'');
   $('recCap').textContent = rec.opp ? '상대 기준 · 전체 영웅'
-    : (rec.kind==='pre' ? '내 미리 밴 · 전체 '+LIST.length+'명' : '내 기준 · 보유 '+ownCount()+'명');
-  const hints = {
-    pre:'상대가 실제로 가장 많이 잘라낸 카드를 먼저 보여줍니다. 랭커 프리밴 기록 → 최근 픽률·승률 순입니다. 내 두 칸은 서로 달라야 하고, 상대 프리밴과 겹쳐도 됩니다.',
-    oppPre:'지금은 <b>상대 미리 밴</b> 차례입니다 — 상대도 자를 만한 카드를 예상해 보여줍니다. 실제로 상대가 밴한 영웅을 오른쪽에서 그대로 기록하세요.',
-    pick:'최근 3주 실전 데이터(픽률·승률·이 자리 승률)에 상대 픽 상성·내 조합 시너지를 더해 정렬했습니다. 카드의 ✕ 없는 영웅을 누르면 그 영웅만 빠집니다.',
-    oppPick:'지금은 <b>상대 픽</b> 차례입니다 — 내 픽을 기준으로 <b>상대가 고르기 좋은 카드</b>(내 픽 카운터 · 상대 조합 시너지 · 그 자리 실전 승률)를 보여줍니다.',
-    done:'밴픽이 끝났습니다. 최종 4:4 조합을 확인하세요.'
-  };
-  $('recHint').innerHTML = hints[rec.kind]||'';
-  if(rec.kind==='pick' && fitOn()){
-    $('recHint').innerHTML += '<br><b style="color:#8ff0b8">👤 내 전적 맞춤 ON</b> — VLSI 실제 승률(5판↑)을 랭커 점수에 더해 정렬했습니다.';
-  }
+    : (rec.kind==='pre' ? '내 프리밴 · 전체 '+LIST.length+'명' : '내 기준 · 보유 '+ownCount()+'명');
   renderFit();
   renderRmStrip(rec);
   const fsw = fireStatus();
@@ -2507,9 +2486,7 @@ function renderRecs(){
       ? '1픽 <b>'+esc(H[S.my[0]].name)+'</b>이(가) 밴당하면 ' : '')
       + '4:4에 남는 딜러/브루저가 <b>'+fsw.guaranteed+'명</b>입니다. 지금 화력을 채우세요.';
   }
-  if(rec.step && rec.step.t==='pick' && rec.step.i===2 && rec.kind==='pick'){
-    $('recHint').innerHTML = '<b style="color:#ffe6a3">지금은 3픽(밴가드)</b> — 상대 최종 밴에서 지켜지는 자리입니다. 상대 카운터나 조합 핵심을 넣으세요.';
-  }
+  syncRecHead();
   if(rec.kind==='done'){
     $('recList').innerHTML = summaryHTML();
     $('recCount').textContent='';
@@ -2871,12 +2848,12 @@ function applyCode(code, silent){
   }
   const blocked=blockedForStep(a);
   if(blocked[code]){
-    toast(a.t==='pre' ? '같은 팀 미리 밴 두 칸에는 같은 영웅을 넣을 수 없습니다 (상대 미리 밴과는 겹칠 수 있음)' : '이미 미리 밴·픽에 들어간 영웅입니다');
+    toast(a.t==='pre' ? '같은 팀 프리밴 두 칸에는 같은 영웅을 넣을 수 없습니다 (상대 프리밴과는 겹칠 수 있음)' : '이미 프리밴·픽에 들어간 영웅입니다');
     return false;
   }
   snapshot(); slotSet(a,code); ACTIVE=null;
   save(); renderAll();
-  if(!silent) toast(h.name+' → '+(a.t==='pre'?'미리 밴':(a.t==='pick'?'픽':'최종 밴'))+' 적용');
+  if(!silent) toast(h.name+' → '+(a.t==='pre'?'프리밴':(a.t==='pick'?'픽':'최종 밴'))+' 적용');
   return true;
 }
 function clearSlot(st){
@@ -3167,7 +3144,7 @@ function setTab(name){
 function mobTurn(){
   const a=activeStep();
   if(!a) return ['밴픽 완료','4:4 점검'];
-  if(a.t==='pre') return [(a.s==='my'?'내 ':'상대 ')+'미리 밴',(a.i+1)+'/2'];
+  if(a.t==='pre') return [(a.s==='my'?'내 ':'상대 ')+'프리밴',(a.i+1)+'/2'];
   if(a.t==='pick') return [(a.s==='my'?'내 ':'상대 ')+(a.i+1)+'픽', a.i===2 ? '밴가드' : ''];
   return [(a.s==='my'?'내 ':'상대 ')+'최종 밴',''];
 }
