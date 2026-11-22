@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#070a12">
-<title>에픽세븐 실레나 밴픽 v4.6 · VLSI 전적 맞춤</title>
+<title>에픽세븐 실레나 밴픽 v4.6.1 · VLSI 전적 맞춤</title>
 <style>
 :root{
   --bg:#070a12; --bg2:#0b1020; --panel:#0f1729; --panel2:#131f36;
@@ -1035,7 +1035,7 @@ button{font-family:inherit}
   <div class="top">
     <div class="brand">
       <div class="mark">⚔️</div>
-      <div><b>에픽세븐 실레나 밴픽<span class="vtag">v4.6</span></b><span id="subTitle">VLSI 맞춤 · 최신 실전</span></div>
+      <div><b>에픽세븐 실레나 밴픽<span class="vtag">v4.6.1</span></b><span id="subTitle">VLSI 맞춤 · 최신 실전</span></div>
     </div>
     <div class="spacer"></div>
     <span class="chip data" id="dataChip" title="실제 전적검색 전투 기록">🏆 실전 <b>—</b></span><span class="chip" id="seasonChip">2026 폴 · ss21</span>
@@ -2359,34 +2359,41 @@ function scorePreban(code, opts){
 }
 function scoreBan(code, opts){
   const e=H[code]; let sc = value(e)*4; const why=[];
+  /* v4.6.1 : 위협 요소를 따로 집계(parts)해 최종 밴 정렬(banThreat)이 재사용한다.
+     sc 자체는 v4.6과 동일 — 상대 위협 패널 등 기존 화면 값은 그대로 둔다. */
+  const T = {ctrHits:0, tagV:0, tagSum:0, extraHits:0, muBest:0, muWith:null, roleKey:0, synN:0, rb:0};
   const rp=recentPickPct(e), rw=recentWin(e), rb=recentBanPct(e);
+  T.rb = rb || 0;
   if(rp>=12) why.push({w:2.2, m:1, t:'최근 실전 픽률 <b>'+pc(rp)+'%</b>'+(rw!=null?' · 승률 '+pc(rw)+'%':'')});
   let hit=null;
   mineState().forEach(function(m){
     const M=H[m];
-    if(M.ctr.indexOf(code)>=0){ sc+=5; if(!hit) hit='내 <b>'+M.name+'</b>'+josa(M.name,'을','를').slice(M.name.length)+' 공식 지표상 직접 카운터'; }
+    if(M.ctr.indexOf(code)>=0){ sc+=5; T.ctrHits++; if(!hit) hit='내 <b>'+M.name+'</b>'+josa(M.name,'을','를').slice(M.name.length)+' 공식 지표상 직접 카운터'; }
     const te=tagEdges(e,M);
-    if(te.v>0){ sc+=Math.min(4, te.v*1.6); if(!hit) hit='내 <b>'+M.name+'</b>의 <b>'+josa(te.msgs[0].def,'을','를')+'</b> 무력화 — '+te.msgs[0].t; }
-    if((EXTRA[code]||[]).indexOf(m)>=0){ sc+=2.5; }
+    if(te.v>0){ sc+=Math.min(4, te.v*1.6); T.tagSum+=te.v; if(te.v>T.tagV) T.tagV=te.v;
+      if(!hit) hit='내 <b>'+M.name+'</b>의 <b>'+josa(te.msgs[0].def,'을','를')+'</b> 무력화 — '+te.msgs[0].t; }
+    if((EXTRA[code]||[]).indexOf(m)>=0){ sc+=2.5; T.extraHits++; }
   });
   if(hit) why.push({w:3.4, hot:1, t:hit});
   let muHit=null, muBest=0;
   mineState().forEach(function(m){
     const q=muWR(code,m);
-    if(q && q.n>=25 && q.wr-50>muBest){ muBest=q.wr-50; muHit='내 <b>'+esc(H[m].name)+'</b> 상대로 실전 <b>'+pc(q.wr)+'%</b> ('+q.n+'판) — 실제로 내 픽을 잡아먹는 카드'; }
+    if(q && q.n>=25 && q.wr-50>muBest){ muBest=q.wr-50; T.muWith=m; muHit='내 <b>'+esc(H[m].name)+'</b> 상대로 실전 <b>'+pc(q.wr)+'%</b> ('+q.n+'판) — 실제로 내 픽을 잡아먹는 카드'; }
   });
+  T.muBest = muBest;
   if(muHit){ sc += Math.min(4, muBest*0.3); why.push({w:3.8, hot:1, m:1, t:muHit}); }
   const foes=enemiesState().filter(x=>x!==code);
   const roles=foes.map(x=>roleOf(H[x]));
   const r=roleOf(e);
   const isKey = (r==='힐' && !roleLabelLite(roles,'힐')) || (r==='오프너' && !roleLabelLite(roles,'오프너')) || (r==='딜러' && !roleLabelLite(roles,'딜러'));
-  if(isKey){ sc+=4.2; why.push({w:3, gold:1, t:'상대 조합의 유일한 <b>'+roleLabel(r)+'</b> 축 — 끊으면 상대 플랜이 무너짐'}); }
+  if(isKey){ sc+=4.2; T.roleKey=1; why.push({w:3, gold:1, t:'상대 조합의 유일한 <b>'+roleLabel(r)+'</b> 축 — 끊으면 상대 플랜이 무너짐'}); }
   let synN=0; foes.forEach(function(f){ if(H[f].syn.indexOf(code)>=0||e.syn.indexOf(f)>=0) synN++; });
+  T.synN = synN;
   if(synN){ sc+=1.4*synN; why.push({w:1.9, t:'상대 '+(synN>=2?'조합':'픽')+'과 공식 시너지 상위 — 함께 쓰이면 시너지가 큼'}); }
   if(rb>=20) why.push({w:1.6, m:1, t:'실전 후밴 '+fmt(rb)+'% — 상위권이 실제로 자주 자르는 카드'});
   if(e.note) why.push({w:1.2, note:1, t:e.note});
   if(!why.length) why.push({w:1, t:statLine(e)});
-  return {code:code, sc:sc, why:sortWhy(why)};
+  return {code:code, sc:sc, why:sortWhy(why), parts:T};
 }
 function roleLabelLite(roles,r){ return roles.indexOf(r)>=0; }
 
@@ -2599,7 +2606,8 @@ function banMini(rows, side){
     const tag = side==='my'
       ? '<b>'+pc(r.est)+'%</b>'
       : '<b class="dn">'+pc(r.est)+'%</b>';
-    return '<div class="row" title="'+esc(h.name)+' — 참고용 목록입니다"><i>'+(i+1)+'</i>'
+    const tip = esc(h.name)+' — '+(side==='opp'?'잘리면 내 승률(위협 +'+fmt(r.threat||0)+')':'밴 뒤 내 승률(위협 +'+fmt(r.threat||0)+')')+' · 참고용 목록입니다';
+    return '<div class="row" title="'+tip+'"><i>'+(i+1)+'</i>'
       + '<img src="'+IMG(h.code)+'" alt="" onerror="this.style.visibility=\'hidden\'">'
       + '<span>'+esc(h.name)+'</span>'+tag+'</div>';
   }).join('')+'</div>';
@@ -2612,18 +2620,23 @@ function banCardHTML(r, side){
     ? '<span class="sc">'+pc(r.est)+'%<small>밴 뒤 내 승률</small></span>'
     : '<span class="sc">'+pc(r.est)+'%<small>잘리면 내 승률</small></span>';
   const dlt = (r.delta>=0? '+':'')+pc(r.delta)+'p';
+  /* v4.6.1 : 순위가 예상 승률만으로 정해지지 않으므로 배지도 위협을 함께 본다 */
+  const tv = 0.35*(r.threat||0);
   const risk = side==='opp'
-    ? '<span class="risk '+riskOf(r.delta).k+'">'+riskOf(r.delta).t+'</span>'
-    : (function(){ const k = r.delta>=1.2?'h':(r.delta>=0.5?'m':'l');
-        const t = r.delta>=1.2?'밴 가치 높음':(r.delta>=0.5?'밴 가치 보통':'밴 가치 낙음');
+    ? '<span class="risk '+riskOf(Math.abs(r.delta)+tv).k+'">'+riskOf(Math.abs(r.delta)+tv).t+'</span>'
+    : (function(){ const val = r.delta + tv; const k = val>=1.0?'h':(val>=0.4?'m':'l');
+        const t = val>=1.0?'밴 가치 높음':(val>=0.4?'밴 가치 보통':'밴 가치 낙음');
         return '<span class="risk '+k+'">'+t+'</span>'; })();
+  const thr = (r.threat||0)>=0.5
+    ? ' · 위협 <b>+'+fmt(r.threat)+'</b>'
+    : '';
   const btn = side==='my'
     ? '<button class="btn pri" data-apply="'+r.code+'">이 카드 밴</button>'
     : '<button class="btn" data-apply="'+r.code+'">이 카드가 밴됨</button>';
-  return '<div class="'+cls+'" data-banrec="'+r.code+'">'
+  return '<div class="'+cls+'" data-banrec="'+r.code+'" data-threat="'+fmt(r.threat||0)+'">'
     + '<div class="h"><span class="rk">'+r.rank+'</span>'
     +   '<span class="av"><span class="ini">'+esc(h.name.slice(0,1))+'</span><img src="'+IMG(h.code)+'" alt="" onerror="this.style.display=\'none\'">'+elIcon(h.el)+'</span>'
-    +   '<span class="nm">'+esc(h.name)+'<small>'+elName(h.el)+' · '+esc(h.role||jobName(h.job))+' · '+dlt+'</small></span>'
+    +   '<span class="nm">'+esc(h.name)+'<small>'+elName(h.el)+' · '+esc(h.role||jobName(h.job))+' · '+dlt+thr+'</small></span>'
     +   main + '</div>'
     + '<div>'+risk+'</div>'
     + '<ul class="why">'+r.why.slice(0,3).map(w=>'<li class="'+(w.hot?'hot ':'')+'">'+w.t+'</li>').join('')+'</ul>'
@@ -2655,7 +2668,7 @@ function renderBanPanel(rec){
     + '<div class="banSec'+(side==='my'?' opp':'')+'"><h4>'+head2+' <span>1~4순위</span></h4>'
     +   banMini(others, side==='my'?'opp':'my')
     + '</div>'
-    + '<div class="bhint">표시된 승률은 <b>밴이 끝난 뒤 4:4 조합</b>의 예상 승률입니다. 픽 순서가 아니라 조합(집합)으로만 계산합니다.'
+    + '<div class="bhint">표시된 승률은 <b>밴이 끝난 뒤 4:4 조합</b>의 예상 승률입니다. 픽 순서가 아니라 조합(집합)으로만 계산합니다.<br>순위는 그 승률에 <b>카운터·태그 무력화·실전 1:1 매치업·후밴 위협</b>을 더해 정합니다(최대 +6).'
     + (side==='opp' ? '<br><a class="lnkfin" data-act="finish" role="button">상대 최종 밴을 모르면 기록 없이 마치기</a>' : '')
     + '</div>'
     + '</div>';
@@ -2806,6 +2819,55 @@ function banTargets(side){
   const guard = side==='my' ? S.opp[2] : S.my[2];   // 상대(또는 내) 3픽 = 밴가드
   return slot.filter(function(c){ return c && c!==guard; });
 }
+/* ---------------- v4.6.1 : 최종 밴 정렬용 카운터·위협 점수 ----------------
+   예상 승률(est)만으로 줄을 세우면 공식 카운터·태그 무력화·최악 1:1 매치업·실전 후밴
+   위협이 큰 카드가 0.5~1p 차이로 뒤로 밀린다(실제 판 #92292883 이바나=4위).
+   est·delta 숫자는 그대로 두고 정렬 점수(sortSc)에만 위협을 가산한다.
+   · 내가 밴할 때(side='my')  : 그 카드가 내 팀을 위협하는 정도
+   · 상대가 밴할 때(side='opp'): 내 카드가 상대를 짓누르는 정도(상대가 노릴 이유) */
+function banThreat(side, code){
+  const p={ctr:0, tag:0, extra:0, mu:0, role:0, rb:0};
+  let b=0;
+  if(side==='my'){
+    const s=scoreBan(code, {sorted:true});
+    const T=s.parts || {};
+    if(T.ctrHits){ p.ctr=Math.min(4.0, 2.0*T.ctrHits); b+=p.ctr; }            // 공식 카운터 1건 +2.0
+    if(T.tagV>0){ p.tag=Math.min(3.0, T.tagV*1.2); b+=p.tag; }                 // 태그 무력화 1건 +1.2~3.0
+    if(T.extraHits){ p.extra=Math.min(2.0, 1.0*T.extraHits); b+=p.extra; }     // 기믹 카운터 1건 +1.0
+    if(T.muBest>0){ p.mu=Math.min(3.0, T.muBest*0.25); b+=p.mu; }               // 실전 1:1 최악 매치업
+    if(T.roleKey){ p.role=1.5; b+=p.role; }                                    // 상대의 유일 역할 축
+    if(T.rb>=20){ p.rb=1.5*Math.min(1, T.rb/40); b+=p.rb; }                    // 실전 후밴 20%+
+    p.muWith=T.muWith||null;
+  } else {
+    const h=H[code], foes=enemiesState();
+    let ctr=0, tagMax=0, extra=0, muBest=0, muWith=null;
+    foes.forEach(function(f){
+      const F=H[f]; if(!F) return;
+      if(F.ctr.indexOf(code)>=0) ctr++;                       // 상대가 어려워하는 카운터
+      const te=tagEdges(h,F); if(te.v>tagMax) tagMax=te.v;
+      if((EXTRA[f]||[]).indexOf(code)>=0) extra++;
+      const q=muWR(code,f);
+      if(q && q.n>=25 && q.wr-50>muBest){ muBest=q.wr-50; muWith=f; }
+    });
+    p.ctr=Math.min(3.0, 0.9*ctr); b+=p.ctr;
+    p.tag=Math.min(2.0, 0.9*tagMax); b+=p.tag;
+    p.extra=Math.min(1.5, 0.75*extra); b+=p.extra;
+    p.mu=Math.min(3.0, 0.20*muBest); b+=p.mu;
+    const r=roleOf(h), roles=foes.map(c=>roleOf(H[c]));
+    if((r==='힐'||r==='오프너'||r==='딜러') && roles.indexOf(r)<0){ p.role=1.0; b+=p.role; }
+    const rb=recentBanPct(h);
+    if(rb>=15){ p.rb=Math.min(1.2, 1.2*rb/40); b+=p.rb; }
+    p.muWith=muWith;
+    p.raw=Math.round(b*100)/100;
+    p.cap=Math.round(3.0*(1-Math.exp(-b/5))*100)/100;   // 0~3점으로 누그럽게 포화
+    p.total=p.cap;
+    return p;
+  }
+  p.raw = Math.round(b*100)/100;
+  p.cap = Math.round(6.0*(1-Math.exp(-b/4.5))*100)/100;   // 한 카드가 예상 승률을 통째로 덮지 않게 0~6점으로 누그럽게 포화
+  p.total = p.cap;
+  return p;
+}
 function banCandidates(side){
   const mine=sortedSet(S.my), foe=sortedSet(S.opp);
   if(mine.length<5 || foe.length<5) return [];
@@ -2814,11 +2876,16 @@ function banCandidates(side){
     const m2 = side==='my' ? mine : mine.filter(x=>x!==c);
     const f2 = side==='my' ? foe.filter(x=>x!==c) : foe;
     const e = setEstimate(m2,f2);
-    return {code:c, est:e.est, base:base, delta:e.est-base, est2:e, side:side};
+    const th = banThreat(side, c);
+    return {code:c, est:e.est, base:base, delta:e.est-base, est2:e, side:side,
+            threat:th.total, thParts:th,
+            sortSc: side==='my' ? e.est+th.total : e.est-th.total};
   });
   out.sort(function(a,b){
-    const d = side==='my' ? (b.est-a.est) : (a.est-b.est);
+    const d = side==='my' ? (b.sortSc-a.sortSc) : (a.sortSc-b.sortSc);
     if(Math.abs(d)>1e-9) return d;
+    const de = side==='my' ? (b.est-a.est) : (a.est-b.est);
+    if(Math.abs(de)>1e-9) return de;
     return a.code < b.code ? -1 : 1;
   });
   out.forEach(function(x,i){ x.rank=i+1; });
@@ -2858,7 +2925,8 @@ function banToRec(x){
     if(rb>=15) why.push({w:1.6, t:'실전 후밴 '+fmt(rb)+'%로 상위권이 실제로 자주 자르는 카드'});
     if(!why.length) why.push({w:1, t:statLine(h)});
   }
-  return {code:x.code, sc:x.est, est:x.est, base:x.base, delta:x.delta, rank:x.rank, side:x.side, why:sortWhy(why), ban:x};
+  return {code:x.code, sc:x.sortSc!==undefined?x.sortSc:x.est, est:x.est, base:x.base, delta:x.delta, rank:x.rank, side:x.side,
+          threat:(x.threat||0), thParts:x.thParts||null, why:sortWhy(why), ban:x};
 }
 
 function renderBoard(){
@@ -4165,6 +4233,7 @@ setTimeout(measureMob, 400);
 window.__app = {get S(){return S;}, get recs(){return RECS;}, H:H, LIST:LIST, get total(){return LIST.length;}, applyCode:applyCode, renderAll:renderAll, get step(){return activeStep();}, clearSlot:clearSlot, setActive:setActive, get hist(){return HIST.length;}, banCandidates:banCandidates, setEstimate:setEstimate, get MS(){return MS;},
     saveDraft:saveDraft, loadDraft:loadDraft, clearDraft:clearDraft, get DKEY(){return DKEY;}, stageBadge:stageBadge, stepNav:stepNav, get compact(){return COMPACT;}, syncCompact:syncCompact, battlePlan:battlePlan, battlePlanHTML:battlePlanHTML, myFinal4:myFinal4, oppFinal4:oppFinal4, focusActiveSlot:focusActiveSlot, slotLabel:slotLabel,
     scorePreban:scorePreban, scoreOppPre:scoreOppPre, preSplitFor:preSplitFor, preBanPct:preBanPct, prePairN:prePairN, recentPickPct:recentPickPct, recentWin:recentWin, recentBanPct:recentBanPct,
+    scoreBan:scoreBan, banThreat:banThreat, banToRec:banToRec, tagEdges:tagEdges, muWR:muWR, banTargets:banTargets, roleOf:roleOf, get EXTRA(){return EXTRA;},
     pStat:pStat, get FIT(){return FIT;}, setFit:function(v){ FIT.on=!!v; try{localStorage.setItem('e7rta.fit', FIT.on?'1':'0');}catch(e){} renderFit(); renderAll(); },
     playerBadge:playerBadge, deckThreat:deckThreat, fireOf:fireOf, fireStatus:fireStatus, fireCount:fireCount, aceInfo:aceInfo, myCore:myCore, scorePick:scorePick, caseDraft:caseDraft, get MDB(){return MDB;}, get player(){return playerStats;}, get fitOn(){return fitOn();}, roleModel:roleModel, rmCombo:rmCombo, rmTriple:rmTriple, rmPrebanN:rmPrebanN, rmModels:rmModels, DEFAULT_UNOWNED:DEFAULT_UNOWNED, applyDefaultUnowned:applyDefaultUnowned, get missing(){return S.missing;}, patch:patOf, get PATD(){return PATD;}, setTab:setTab, get tab(){return TAB;}, teamEstimate:teamEstimate, renderMobCheck:renderMobCheck, renderMobBar:renderMobBar, mobTurn:mobTurn};
 })();
