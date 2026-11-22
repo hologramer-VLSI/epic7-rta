@@ -3415,12 +3415,18 @@ function matchMetaHTML(){
         return '<div class="c"><div><div class="pair">'+esc(nm(p[0]))+' <em>+</em> '+esc(nm(p[1]))+'</div>'
           + '<div class="why">실제 동반 출전 '+p[2]+'판</div></div><div class="sc">승률 '+pc(p[3])+'%</div></div>';
       }).join('')+'</div>'
-    + '<div class="phead" style="border:0;padding:10px 0 6px"><h2>랭커 최다 프리밴 페어</h2><span class="sub">상위권이 실제로 함께 자르는 2인 조합</span></div>'
-    + '<div class="combo">'+preP.map(function(p){
-        return '<div class="c"><div><div class="pair">'+esc(nm(p[0]))+' <em>+</em> '+esc(nm(p[1]))+'</div>'
-          + '<div class="why">프리밴 '+p[2].toLocaleString()+'회 · 프리밴 팀 승률 '+pc(MS.preTeamWin)+'%</div></div>'
-          + '<div class="sc">'+(p[2]>=1000?'고정 밴':'주요 밴')+'</div></div>';
-      }).join('')+'</div>'
+    + '<div class="phead" style="border:0;padding:10px 0 6px"><h2>랭커 최다 프리밴 페어</h2><span class="sub">v4.5.4 — 선픽 팀 / 후픽 팀을 나눠 집계한 2인 조합</span></div>'
+    + ['first','second'].map(function(k){
+        const rows=((MATCH.pre[k]||{}).pair||[]).slice(0,5);
+        const lab=(k==='first'?'선픽':'후픽');
+        return '<div class="phead" style="border:0;padding:6px 0 3px"><h4 style="font-size:11px">'+lab+' 팀 TOP 5</h4>'
+          + '<span class="sub">'+(k==='first'?'내가 선픽일 때 추천에 반영':'내가 후픽일 때 추천에 반영')+'</span></div>'
+          + '<div class="combo">'+rows.map(function(p){
+              return '<div class="c"><div><div class="pair">'+esc(nm(p[0]))+' <em>+</em> '+esc(nm(p[1]))+'</div>'
+                + '<div class="why">'+lab+' 프리밴 '+p[2].toLocaleString()+'회 · '+lab+' 팀 프리밴율 '+pc(((MATCH.pre[k].hero||{})[p[0]]||0))+'% / '+pc(((MATCH.pre[k].hero||{})[p[1]]||0))+'%</div></div>'
+                + '<div class="sc">'+(p[2]>=1000?'고정 밴':'주요 밴')+'</div></div>';
+            }).join('')+'</div>';
+      }).join('')
     + '<div class="anRow" style="grid-template-columns:78px 1fr"><b>해석</b><div class="v" style="font-size:10.5px;line-height:1.6;color:#9aabc9">'
     +   '실전 승률은 <b>출전한 4명</b> 기준(후밴된 영웅 제외). 후밴 손익은 그 영웅이 잘린 팀의 승률 — 낮을수록 밴 가치가 큽니다. 3픽(밴가드)은 실제 기록에서도 후밴 0건으로 확인되었습니다.</div></div>'
     + '</div>';
