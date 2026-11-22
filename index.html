@@ -2833,7 +2833,7 @@ function banThreat(side, code){
     const T=s.parts || {};
     if(T.ctrHits){ p.ctr=Math.min(4.0, 2.0*T.ctrHits); b+=p.ctr; }            // 공식 카운터 1건 +2.0
     if(T.tagV>0){ p.tag=Math.min(3.0, T.tagV*1.2); b+=p.tag; }                 // 태그 무력화 1건 +1.2~3.0
-    if(T.extraHits){ p.extra=Math.min(2.0, 1.0*T.extraHits); b+=p.extra; }     // 기믹 카운터 1건 +1.0
+    if(T.extraHits){ p.extra=Math.min(3.0, 1.5*T.extraHits); b+=p.extra; }     // 기믹 카운터 1건 +1.5
     if(T.muBest>0){ p.mu=Math.min(3.0, T.muBest*0.25); b+=p.mu; }               // 실전 1:1 최악 매치업
     if(T.roleKey){ p.role=1.5; b+=p.role; }                                    // 상대의 유일 역할 축
     if(T.rb>=20){ p.rb=1.5*Math.min(1, T.rb/40); b+=p.rb; }                    // 실전 후밴 20%+
