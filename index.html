@@ -2921,7 +2921,8 @@ function battlePlan(){
   const fWhy = (function(){
     const tags=FRONT_W.map(function(t){ return tagHas(fh,t)?({보호막:'보호막',피해분배:'피해 분배',도발:'도발 어그로',면역:'면역',반격:'반격',불사:'불사 생존'})[t]:''; }).filter(Boolean);
     if(tagHas(fh,'tank')||fh.job==='knight') tags.unshift('탱커');
-    return (tags.slice(0,2).join('·')||'전열 탱커')+'로 상대 선턴을 받아냅니다';
+    const fr = tags.slice(0,2).join('·') || '전열 탱커';
+    return josa(fr,'으로','로')+' 상대 선턴을 받아냅니다';
   })();
   const bWhy = (function(){
     if(tagHas(bh,'nuker')) return '핵심 딜러, 점사·광역기 앞에서 보호·행게로 살리기';
