@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#070a12">
-<title>에픽세븐 실레나 밴픽 v4.5.2 · VLSI 전적 맞춤</title>
+<title>에픽세븐 실레나 밴픽 v4.5.3 · VLSI 전적 맞춤</title>
 <style>
 :root{
   --bg:#070a12; --bg2:#0b1020; --panel:#0f1729; --panel2:#131f36;
@@ -738,7 +738,7 @@ button{font-family:inherit}
   body[data-tab="board"] .col.mid{display:flex}
   body[data-tab="pick"] .col.right{display:flex}
   body[data-tab="check"] .col.check{display:flex}
-  body[data-tab="board"] .mobBar{display:none}
+  body[data-tab="board"] .mobBar .mbRow2{display:none}
   body[data-tab="rec"] .col.left,
   body[data-tab="pick"] .col.right{
     height:calc(100dvh - var(--topH) - var(--barH) - var(--mobNav) - 26px);min-height:300px;
@@ -846,6 +846,177 @@ button{font-family:inherit}
 @media (max-width:335px){
   .grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}
 }
+
+/* ================= v4.5.3 : 단계 배지(항상 표시) · 분할 화면 밀도 ================= */
+.btn .xs{display:none}
+/* (0) 3픽 = 밴가드 — 짧은 배지로 항상 표시 (PC·모바일 공통) */
+.gchip{display:inline-block;font-size:8.5px;font-weight:900;letter-spacing:-.2px;line-height:1.5;
+  padding:0 5px;margin-right:4px;border-radius:5px;white-space:nowrap;vertical-align:1px;
+  background:linear-gradient(135deg,#3a2f0d,#241d07);border:1px solid #6d571d;color:#ffe6a3}
+.slot.pick[data-i="2"]{border-color:#5d4a1a}
+.slot.pick[data-i="2"] .gchip{box-shadow:0 0 8px rgba(255,212,92,.18)}
+.stageNow .gchip{display:block;width:max-content;margin:0 auto 2px;font-size:8px;padding:0 4px}
+.tg.guard{background:linear-gradient(135deg,#3a2f0d,#241d07);border-color:#6d571d;color:#ffe6a3;font-weight:900}
+.rc .why li.guard1{color:#ffe6a3}
+.rc .why li.guard1 b{color:#ffd45c}
+.slot.pre .gchip,.slot.pre .st .gchip{font-size:8px}
+
+/* (0-2) 4:4 배치 · 운영 방향 컴팩트 카드 */
+.planBox{border:1px solid #2b4a7a;border-radius:11px;padding:7px 9px;display:grid;gap:3px;
+  background:linear-gradient(180deg,rgba(23,41,72,.94),rgba(11,19,34,.95));box-shadow:0 4px 14px rgba(0,0,0,.22)}
+.planBox.pre{border-color:#3a4a66;background:linear-gradient(180deg,rgba(20,32,54,.92),rgba(11,19,34,.95))}
+.planBox .pbTop{display:flex;align-items:center;gap:5px;font-size:10.5px;font-weight:900;color:#dbe7ff;letter-spacing:-.2px}
+.planBox .pbTop .pbSub{margin-left:auto;font-size:8.5px;font-weight:800;color:#8194b6;border:1px solid #2b4470;border-radius:5px;padding:0 4px;white-space:nowrap}
+.planBox .pRow{display:grid;grid-template-columns:30px minmax(0,1fr);gap:5px;align-items:start;font-size:10px;line-height:1.35}
+.planBox .pRow b{font-size:8.5px;font-weight:900;padding:0 3px;border-radius:4px;text-align:center;white-space:nowrap;line-height:1.6}
+.planBox .pRow b.fr{color:#a9c2ff;background:rgba(47,107,255,.16);border:1px solid #2b4470}
+.planBox .pRow b.bk{color:#8ff0b8;background:rgba(62,224,138,.14);border:1px solid #1e5b40}
+.planBox .pRow b.tg2{color:#ffb3c0;background:rgba(255,77,104,.14);border:1px solid #7c2a3a}
+.planBox .pRow span{color:#a6b9d6;min-width:0}
+.planBox .pRow i{font-style:normal;font-weight:900;color:#fff;font-size:10.5px}
+.planBox .pNote{font-size:9.5px;color:#ffe6a3;line-height:1.35;border-top:1px dashed #2b4470;padding-top:3px}
+.anBody .planBox{margin:2px 0}
+
+/* (1) 미니 바 = 1줄 단계 배지 + (2줄) 픽 요약 */
+@media (max-width:920px){
+  .mobBar{display:flex;flex-direction:column;align-items:stretch;gap:3px!important;padding:4px 7px}
+  .mbRow1{display:flex;align-items:center;gap:5px;min-width:0;width:100%}
+  .mbRow2{display:flex;align-items:center;gap:4px;min-width:0;width:100%}
+  .mbTurn{display:flex;align-items:center;gap:5px;flex:1 1 auto;min-width:0;max-width:none;
+    padding:3px 8px;border-radius:8px;font-size:11px;font-weight:900;letter-spacing:-.2px;
+    color:#ffe6a3;border:1px solid #6d571d;background:linear-gradient(135deg,#3a2f0d,#241d07);
+    box-shadow:0 1px 0 rgba(255,255,255,.05) inset}
+  .mbTurn .ic{font-size:11.5px;flex:none;line-height:1}
+  .mbTurn b{font-size:11.5px;font-weight:900;color:inherit;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mbTurn.me{color:#eaf2ff;border-color:#34599b;background:linear-gradient(135deg,#1a3768,#0d1e3a)}
+  .mbTurn.op{color:#ffe3e8;border-color:#8c3346;background:linear-gradient(135deg,#4d1522,#280d13)}
+  .mbTurn.ban{color:#ffe6a3;border-color:#6d571d;background:linear-gradient(135deg,#3a2f0d,#241d07)}
+  .mbTurn.done{color:#c8f7dc;border-color:#1e5b40;background:linear-gradient(135deg,#0f2b20,#0c1d16)}
+  .mbTurn.edit{outline:1px solid rgba(255,212,92,.75);outline-offset:-1px}
+  .mbProg{flex:none;font-size:9px;font-weight:900;color:#93a4c4;white-space:nowrap;letter-spacing:-.2px}
+  .mbProg b{color:#cfe0ff}
+  .mbNav{display:flex;gap:3px;flex:none;margin-left:auto}
+  .mbArrow{width:26px;height:24px;border-radius:7px;border:1px solid #2b4470;background:#0c1626;color:#a9c2ff;
+    font-size:9px;font-weight:900;display:grid;place-items:center;padding:0;cursor:pointer;line-height:1}
+  .mbArrow:active{background:#16233c;color:#fff}
+  .mbArrow:disabled{opacity:.3}
+  body[data-tab="board"] .mbRow2{display:none}
+  body[data-tab="board"] .mobBar{padding:3px 7px}
+  /* 추천 카드 설명 압축 — 핵심 2줄까지만 */
+  .rc .why li:nth-child(n+3){display:none}
+  .rc .tags .tg:nth-child(n+3){display:none}
+  /* 3픽(밴가드) 슬롯은 모바일에서도 짧은 배지만 남긴다 */
+  .slot .st .gchip{font-size:8px;padding:0 3px;margin-right:3px}
+}
+
+/* (2) 분할 화면(높이 560px 이하) — 헤더·바·탭·카드를 최소 높이로 */
+@media (max-width:920px) and (max-height:560px){
+  :root{--mobNav:44px}
+  .app{padding:0 5px 6px;row-gap:4px}
+  /* 헤더 1줄 */
+  .top{flex-wrap:nowrap!important;row-gap:0;gap:4px;padding:3px 6px;margin-bottom:-6px}
+  .top .brand{flex:0 1 auto;gap:3px}
+  .top .brand .mark{display:none}
+  .top .brand b{font-size:10.5px;letter-spacing:-.4px}
+  .top .brand .vtag{display:none}
+  .top .topAct{display:flex;flex:1 1 auto;justify-content:flex-end;gap:3px}
+  .top .btn{height:26px;padding:0 6px;font-size:10.5px;border-radius:8px}
+  .top .btn .sm{display:none}
+  .top .btn .xs{display:inline}
+  .top .btn.fit{padding:0 5px}
+  .top .btn.fit .st{font-size:8px;padding:0 3px}
+  #btnReset{padding:0 7px}
+  /* 단계 배지 1줄만 */
+  .mobBar{padding:2px 6px;gap:2px!important;border-radius:0 0 9px 9px}
+  .mbRow2{display:none!important}
+  .mbTurn{padding:2px 6px;border-radius:7px}
+  .mbTurn .ic{font-size:10.5px}
+  .mbTurn b{font-size:10.5px}
+  .mbProg{font-size:8.5px}
+  .mbArrow{width:24px;height:20px;font-size:8px;border-radius:6px}
+  /* 하단 탭 */
+  .mobTabs{padding:2px 4px calc(2px + env(safe-area-inset-bottom,0px));gap:4px}
+  .mobTabs button{height:38px;border-radius:9px;gap:1px}
+  .mobTabs button .ti{font-size:13px}
+  .mobTabs button .tl{font-size:9px}
+  /* 탭별 패널 높이 */
+  body[data-tab="rec"] .col.left,
+  body[data-tab="pick"] .col.right{
+    height:calc(100dvh - var(--topH) - var(--barH) - var(--mobNav) - 10px);min-height:0
+  }
+  .phead{padding:4px 8px;gap:5px}
+  .phead h2{font-size:11.5px}
+  .phead .sub,.phead .badge{font-size:8.5px}
+  .phead .sub{display:inline;font-size:8.5px;color:#7f93b5;white-space:nowrap}
+  /* 추천 카드 초압축 */
+  .recHead{display:none!important}
+  .reclist{padding:3px;gap:4px}
+  .recFoot{display:none}
+  .rc{padding:4px 6px;gap:2px;border-radius:9px}
+  .rc .r1{grid-template-columns:15px 32px minmax(0,1fr);gap:6px}
+  .rc .rank{font-size:10px}
+  .rc .ava{width:32px;height:32px;border-radius:8px}
+  .rc .nm{font-size:12px}
+  .rc .met{margin-top:1px;gap:2px}
+  .rc .met span{font-size:8.5px;padding:0 3px;border-radius:3px}
+  .rc .sets{display:none}
+  .rc .tags{margin:0 0 0 1px;gap:2px}
+  .rc .tags .tg{font-size:8px;padding:0 4px}
+  .rc .why{margin:0}
+  .rc .why li{font-size:9.5px;line-height:1.25;padding-left:8px}
+  .rc .why li:nth-child(n+2){display:none}
+  .rc .why li.guard1{display:block!important}
+  .rc .why li.guard1+li{display:none}
+  .rc .acts{display:none}          /* 분할 화면: 카드 전체를 탭하면 바로 적용 */
+  .planBox{padding:4px 6px;gap:1px;border-radius:9px}
+  .planBox .pbTop{font-size:9.5px}
+  .planBox .pRow{font-size:9px;grid-template-columns:27px minmax(0,1fr);gap:4px}
+  .planBox .pRow span{display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+  .planBox .pRow i{font-size:9.5px}
+  .planBox .pNote{font-size:8.5px;padding-top:2px}
+  /* 보드 탭 */
+  .boardWrap{padding-bottom:30px}
+  .boardTop{padding:3px 6px;gap:4px}
+  .boardTop .seg button{padding:3px 8px;font-size:10.5px}
+  .board{padding:4px;gap:5px}
+  .side{padding:5px;gap:4px;border-radius:11px}
+  .sideHead{font-size:10.5px}
+  .banRowLabel{font-size:8.5px}
+  .slot{min-height:44px;padding:3px 7px;gap:5px;grid-template-columns:16px 34px minmax(0,1fr) auto!important}
+  .slot .pic{width:34px!important;height:34px!important;border-radius:9px}
+  .slot .nm{font-size:11.5px}
+  .slot .idx{font-size:9px;height:17px;line-height:17px}
+  .slot .close{width:22px;height:22px;font-size:10px;border-radius:7px}
+  .slot.filled{padding-right:26px}
+  .slot.pre{min-height:30px;padding:2px 6px!important;grid-template-columns:24px minmax(0,1fr)!important}
+  .slot.pre .pic{width:24px!important;height:24px!important;border-radius:6px}
+  .slot.pre .nm{font-size:10px}
+  .stage{padding:0;gap:2px}
+  .stageNow{font-size:10.5px}
+  .rail{display:none}
+  .comp{display:none}
+  .strip{padding:4px 6px;gap:4px;bottom:calc(var(--mobNav) + 3px)}
+  .strip .msg{font-size:10px;flex:1 1 100%;line-height:1.35}
+  .strip .btn{height:30px;font-size:11px}
+  .col.mid{padding-bottom:calc(var(--mobNav) + 14px)}
+  /* 영웅 탭 */
+  .picker{padding:5px;gap:5px}
+  .search input{height:32px;font-size:12px;border-radius:9px}
+  .chips{gap:4px}
+  .chips button{height:26px;font-size:10px;padding:0 6px;border-radius:7px}
+  .chips button .ico{width:14px;height:14px}
+  .grid{grid-template-columns:repeat(6,minmax(0,1fr))!important;gap:4px}
+  .tile .cap{font-size:8px}
+  .pickFoot{display:none}
+  /* 점검 탭 */
+  .col.check .panel{min-height:calc(100dvh - var(--topH) - var(--barH) - var(--mobNav) - 12px)}
+  .mobChkBody{padding:6px;gap:6px}
+  .mobChkBody .mv{padding:7px 8px;gap:4px}
+  .mobChkBody .mvHead b{font-size:18px}
+  .mobChkBody .anRow{grid-template-columns:58px minmax(0,1fr);font-size:10.5px;gap:5px}
+  .mobChkBody .mvNote{font-size:9px}
+  .toast{bottom:calc(var(--mobNav) + 8px)}
+}
 </style>
 </head>
 <body data-tab="board">
@@ -854,18 +1025,18 @@ button{font-family:inherit}
   <div class="top">
     <div class="brand">
       <div class="mark">⚔️</div>
-      <div><b>에픽세븐 실레나 밴픽<span class="vtag">v4.5.2</span></b><span id="subTitle">VLSI 맞춤 · 최신 실전</span></div>
+      <div><b>에픽세븐 실레나 밴픽<span class="vtag">v4.5.3</span></b><span id="subTitle">VLSI 맞춤 · 최신 실전</span></div>
     </div>
     <div class="spacer"></div>
     <span class="chip data" id="dataChip" title="실제 전적검색 전투 기록">🏆 실전 <b>—</b></span><span class="chip" id="seasonChip">2026 폴 · ss21</span>
     <button class="chip" id="syncChip" title="공식 데이터 실시간 동기화 상태 — 눌러서 지금 최신화" style="cursor:pointer;border-style:solid">동기화 확인 중…</button>
-    <button class="btn fit on" id="btnFit" title="내 계정(VLSI) 실제 승률을 추천에 반영 — 눌러서 켜고 끄기"><span class="lg">👤 내 전적 맞춤 (VLSI)</span><span class="sm">👤 VLSI</span><span class="st" id="fitSt">ON</span></button>
+    <button class="btn fit on" id="btnFit" title="내 계정(VLSI) 실제 승률을 추천에 반영 — 눌러서 켜고 끄기"><span class="lg">👤 내 전적 맞춤 (VLSI)</span><span class="sm">👤 VLSI</span><span class="xs">👤</span><span class="st" id="fitSt">ON</span></button>
     <div class="topAct">
-    <button class="btn" id="btnOwn" aria-label="내 영웅함"><span class="lg">👥 내 영웅함 387/392</span><span class="sm">👥 387/392</span></button>
-    <button class="btn" id="btnMeta" aria-label="실시간 메타"><span class="lg">📊 실시간 메타</span><span class="sm">📊 메타</span></button>
-    <button class="btn hideSm" id="btnUndo">↶ 되돌리기</button>
+    <button class="btn" id="btnOwn" aria-label="내 영웅함"><span class="lg">👥 내 영웅함 387/392</span><span class="sm">👥 387/392</span><span class="xs">👥</span></button>
+    <button class="btn" id="btnMeta" aria-label="실시간 메타"><span class="lg">📊 실시간 메타</span><span class="sm">📊 메타</span><span class="xs">📊</span></button>
+    <button class="btn hideSm" id="btnUndo"><span class="lg">↶ 되돌리기</span><span class="sm">↶ 되돌리기</span><span class="xs">↶</span></button>
     <button class="btn" id="btnReset">초기화</button>
-    <button class="btn ghost" id="btnInfo" aria-label="데이터 안내"><span class="lg">ⓘ 데이터</span><span class="sm">ⓘ</span></button>
+    <button class="btn ghost" id="btnInfo" aria-label="데이터 안내"><span class="lg">ⓘ 데이터</span><span class="sm">ⓘ</span><span class="xs">ⓘ</span></button>
     </div>
   </div>
 
@@ -1247,6 +1418,7 @@ let ACTIVE = null;            // {t:'pre'|'pick'|'ban', s:'my'|'opp', i}
 let HIST = [];                // undo stack
 let FILTER = {el:'', job:'', q:''};
 let TAB='board';
+let COMPACT=false;            // v4.5.3 : 모바일 분할 화면(높이 560px 이하) — 카드 전체 탭 = 적용
 let OWNF = {filter:'all'};    // 영웅함 모달 내부 보기 필터
 
 /* 미보유 계산 —— 두 가지 모드를 하나의 MISSING 집합으로 모아 쓴다
@@ -1267,8 +1439,75 @@ function isMissing(code){ return !!MISSING[code]; }
 function missCount(){ let n=0; LIST.forEach(function(h){ if(MISSING[h.code]) n++; }); return n; }
 function ownCount(){ return LIST.length - missCount(); }
 
-function save(){
+/* v4.5.3 : 기본 미보유를 메모리에만 적용하고 저장하지 않으면, 그 뒤 새로고침에서 기본값이 사라진다.
+   부팅 때 한 번 확실히 기록해 두고(applyDefaultUnowned 결과 포함) 이후 변경도 같은 경로로 저장한다. */
+function savePrefs(){
   try{ localStorage.setItem(KEY, JSON.stringify({first:S.first, missing:S.missing, owned:S.owned, ownMode:S.ownMode})); }catch(e){}
+}
+function save(){
+  savePrefs();
+  saveDraft();
+}
+
+/* ---------------- v4.5.3 : 진행 중 밴픽 자동 저장 / 복원 ----------------
+   모바일에서 홈을 눌렀다가 돌아오거나 페이지가 다시 열려도, 방금 올린 프리밴·픽과 커서·탭이 그대로 남는다.
+   저장 위치는 prefs(KEY)와 분리한 DKEY. 읽을 때는 try/catch + 규칙 검증(중복·프리밴된 카드 픽 등)을 거친다. */
+const DKEY='e7rta.draft.v453';
+let DRAFT_READY=false;
+function draftCodeOK(c){ return typeof c==='string' && !!H[c]; }
+function saveDraft(){
+  if(!DRAFT_READY) return;
+  try{
+    localStorage.setItem(DKEY, JSON.stringify({
+      v:1, at:Date.now(), first:S.first,
+      myPre:S.myPre, oppPre:S.oppPre, my:S.my, opp:S.opp,
+      myBan:S.myBan, oppBan:S.oppBan, noOppBan:!!S.noOppBan,
+      active:ACTIVE ? {t:ACTIVE.t, s:ACTIVE.s, i:(ACTIVE.i||0)} : null,
+      tab:TAB
+    }));
+  }catch(e){}
+}
+function clearDraft(){ try{ localStorage.removeItem(DKEY); }catch(e){} }
+function validStep(st){
+  if(!st || typeof st!=='object') return null;
+  const t=st.t, s=st.s, i=Number(st.i)||0;
+  if(t!=='pre' && t!=='pick' && t!=='ban') return null;
+  if(s!=='my' && s!=='opp') return null;
+  if(t==='pre')  return (i>=0 && i<=1) ? {t:'pre',  s:s, i:i} : null;
+  if(t==='pick') return (i>=0 && i<=4) ? {t:'pick', s:s, i:i} : null;
+  return {t:'ban', s:s, i:0};
+}
+function loadDraft(){
+  let j=null;
+  try{ j=JSON.parse(localStorage.getItem(DKEY)||'null'); }catch(e){ j=null; }
+  DRAFT_READY=true;
+  if(!j || typeof j!=='object') return false;
+  function arr(a,n){
+    const r=new Array(n).fill(null);
+    if(!Array.isArray(a)) return r;
+    for(let i=0;i<n;i++){ const c=a[i]; if(draftCodeOK(c) && r.indexOf(c)<0) r[i]=c; }
+    return r;
+  }
+  const myPre=arr(j.myPre,2), oppPre=arr(j.oppPre,2);
+  const my=arr(j.my,5), opp=arr(j.opp,5);
+  /* 규칙 검증: 프리밴된 영웅은 1~5픽 불가 · 같은 팀 안 중복 불가 · 두 팀 픽 간 중복 불가 */
+  const used={};
+  myPre.concat(oppPre).forEach(function(c){ if(c) used[c]=1; });
+  [my,opp].forEach(function(team){
+    for(let i=0;i<5;i++){ const c=team[i]; if(!c) continue; if(used[c]) team[i]=null; else used[c]=1; }
+  });
+  let myBan = draftCodeOK(j.myBan) ? j.myBan : null;
+  if(myBan && (opp.indexOf(myBan)<0 || opp.indexOf(myBan)===2)) myBan=null;   // 상대 픽만·3픽(밴가드) 제외
+  let oppBan = draftCodeOK(j.oppBan) ? j.oppBan : null;
+  if(oppBan && (my.indexOf(oppBan)<0 || my.indexOf(oppBan)===2)) oppBan=null;
+  S.first  = j.first==='opp' ? 'opp' : 'me';
+  S.myPre  = myPre;  S.oppPre = oppPre;
+  S.my     = my;     S.opp    = opp;
+  S.myBan  = myBan;  S.oppBan = oppBan;
+  S.noOppBan = !!j.noOppBan;
+  ACTIVE = validStep(j.active);
+  if(j.tab==='rec'||j.tab==='board'||j.tab==='pick'||j.tab==='check') TAB=j.tab;
+  return !!(myPre.some(Boolean)||oppPre.some(Boolean)||my.some(Boolean)||opp.some(Boolean)||myBan||oppBan);
 }
 /* 내가 없는 영웅 기본값 — 최초 1회만 적용해 사용자가 나중에 바꾼 값을 덮어쓰지 않는다. */
 function applyDefaultUnowned(){
@@ -1299,6 +1538,8 @@ function load(){
   if(!S.owned) S.owned={};
   applyDefaultUnowned();
   rebuildMissing();
+  savePrefs();     // v4.5.3 : 기본 미보유를 포함한 현재 값을 즉시 기록 (새로고침에서 사라지지 않게)
+  loadDraft();
 }
 
 /* ---------------- draft order ---------------- */
@@ -2165,6 +2406,7 @@ function renderBanPanel(rec){
   const head1 = side==='my' ? '밴할 카드 (내가 고르는 순서)' : '상대가 노릴 내 카드 (위험한 순서)';
   const head2 = side==='my' ? '상대 최종 밴 예상 (내 카드 위험)' : '내 최종 밴 추천 (참고)';
   $('recList').innerHTML = '<div class="banWrap">'
+    + battlePlanHTML()
     + '<div class="banSec'+(side==='opp'?' opp':'')+'"><h4>'+head1+' <span>1~4순위</span></h4>'
     +   main.map(r=>banCardHTML(r, side)).join('')
     + '</div>'
@@ -2219,20 +2461,21 @@ function slotHTML(kind, side, i, code, extraCls){
   } else {
     const num = kind==='pick' ? (i+1) : 'B';
     inner += '<span class="idx">'+num+'</span>';
+    const guard = (kind==='pick' && i===2);
     if(code){
       const h=H[code];
       inner += portrait(code,46);
       const sl = (kind==='pick' && i<=2) ? setNames(code) : null;
       inner += '<span class="meta">'
-        + '<span class="nm">'+esc(h.name)+(kind==='pick'&&i===2?'<b class="gf" title="3픽은 밴가드 — 최종 밴에서 지켜집니다">🛡</b>':'')+'</span>'
-        + '<span class="st">'+esc(h.role||jobName(h.job))+' · 픽 '+(h.pick>0?fmt(h.pick):pc(recentPickPct(h)))+'%</span>'
+        + '<span class="nm">'+esc(h.name)+'</span>'
+        + '<span class="st">'+(guard?'<span class="gchip">🛡️ 밴가드</span>':'')+esc(h.role||jobName(h.job))+' · 픽 '+(h.pick>0?fmt(h.pick):pc(recentPickPct(h)))+'%</span>'
         + (sl && sl.eq ? '<span class="sl-set">'+esc(sl.eq)+(sl.art?' · '+esc(sl.art):'')+'</span>' : '')
         + '</span>';
       inner += '<span class="close" data-clear="1" title="지우기" role="button" aria-label="지우기">✕</span>';
     } else {
       inner += '<span class="pic"></span>'
              + '<span class="meta"><span class="nm">'+(kind==='pick'?(i+1)+'픽':'최종 밴')+'</span>'
-             + '<span class="st">비어 있음</span></span>';
+             + '<span class="st">'+(guard?'<span class="gchip">🛡️ 밴가드</span>최종 밴 면제':'비어 있음')+'</span></span>';
     }
   }
   const tip = code ? (' title="'+esc(H[code].name)+' · '+elName(H[code].el)+' '+esc(H[code].role||'')+' · '+statLine(H[code])+'"') : '';
@@ -2406,14 +2649,14 @@ function renderBoard(){
       if(st.s==='opp') sub='상대 프리밴 '+(st.i+1)+'/2';
     } else if(st.t==='pick'){
       now = (st.s==='my'?'내 ':'상대 ')+(st.i+1)+'픽';
-      sub = st.i===2 ? (st.s==='my'?'밴가드 자리':'상대 3픽 = 밴가드') : pickOrderText(st.i);
+      sub = st.i===2 ? (st.s==='my'?'밴가드 — 최종 밴 면제':'상대 3픽 — 최종 밴 면제') : pickOrderText(st.i);
     } else {
       now = st.s==='my' ? '내 최종 밴' : '상대 최종 밴';
       sub = st.s==='my' ? '상대 4명 중 1명 (3픽 제외)' : '내 4명 중 1명 (3픽 제외)';
     }
   }
-  $('stageNow').innerHTML = esc(now)+'<small>'+esc(sub)+'</small>';
-  $('phaseChip').textContent = st ? (st.t==='pre'?'프리밴':st.t==='pick'?'픽':'최종 밴') : '끝';
+  $('stageNow').innerHTML = (st && st.t==='pick' && st.i===2 ? '<span class="gchip">🛡️ 밴가드</span>' : '')+esc(now)+'<small>'+esc(sub)+'</small>';
+  $('phaseChip').textContent = st ? (st.t==='pre'?'프리밴':st.t==='pick'?(st.i===2?'🛡️ 3픽 · 밴가드':'픽'):'최종 밴') : '끝';
   const seq=pickSeq();
   let rail='';
   let drawn={my:0,opp:0};
@@ -2473,7 +2716,7 @@ function renderAnalysis(){
   }
   const a=activeStep();
   let tip='';
-  if(!a) tip='밴픽이 끝났습니다 — 최종 4:4 조합과 예상 승률을 확인하세요.';
+  if(!a){ tip='밴픽이 끝났습니다 — 최종 4:4 조합과 예상 승률을 확인하세요.'; html=battlePlanHTML()+html; }
   else if(a.t==='ban' && a.s==='my') tip='최종 밴은 <b>밴률 1위</b>가 아니라 <b>내 조합을 가장 흔들어 놓는 1명</b>입니다. 3픽은 밴가드라 제외됩니다.';
   else if(a.t==='ban') tip='상대의 최종 밴을 기록하는 단계입니다. 왼쪽 위험 순위를 보고, 실제로 잘린 내 영웅을 눌러주세요.';
   else if(a.t==='pre' && a.s==='opp') tip='지금은 <b>상대 프리밴</b> 차례입니다. 왼쪽은 상대가 자를 만한 카드이고, 실제 밴은 오른쪽에서 기록하세요.';
@@ -2546,6 +2789,7 @@ function renderRecs(){
             ? esc(H[rec.prePartner].name)+' 짝꿍 조합 반영 · 전체 '+LIST.length+'명'
             : '내 프리밴 · 전체 '+LIST.length+'명')
         : '내 기준 · 보유 '+ownCount()+'명');
+  if(COMPACT) $('recCap').textContent = (rec.kind==='done'||rec.kind==='ban') ? '' : '카드 탭 = 적용';
   renderFit();
   renderRmStrip(rec);
   const fsw = fireStatus();
@@ -2578,9 +2822,12 @@ function recCard(r, idx, rec){
   const who = '기록';
   const cls = 'rc'+(idx===0?' top1':(idx<3?' top'+(idx+1):''))+(opp?' opp':'')+(r.danger?' danger':'');
   const myTurn = !opp && rec && rec.kind==='pick';
+  const isGuard = !!(myTurn && rec.step && rec.step.i===2);   // 3픽 = 밴가드 슬롯
   const why = r.why.slice(0,3).map(function(w){
     return '<li class="'+(w.hot?'hot ':'')+(w.m?'ev':'')+(w.fit?' fit':'')+(w.warn?' warn':'')+'">'+w.t+'</li>';
   }).join('');
+  const guardWhy = isGuard
+    ? '<li class="guard1"><b>🛡️ 밴가드 보호</b> — 상대 최종 밴에서 지켜지는 3픽</li>' : '';
   const rp = recentPickPct(h), rw = recentWin(h);
   const metab = '<span class="p"><i>실전픽</i>'+pc(rp)+'%</span>'
     + (rw!=null? '<span class="w"><i>승</i>'+pc(rw)+'%</span>':'')
@@ -2591,8 +2838,8 @@ function recCard(r, idx, rec){
   const acts = opp
     ? '<div class="acts"><button class="btn pri" data-apply="'+h.code+'">'+who+'</button></div>'
     : '<div class="acts"><button class="btn pri" data-apply="'+h.code+'">적용</button>'
-    + '<button class="btn no" data-miss="'+h.code+'" title="이 영웅은 내가 없음 — 추천에서 제외">✕ 없는 영웅</button></div>';
-  return '<div class="'+cls+'" data-rec="'+h.code+'">'
+    + '<button class="btn no" data-miss="'+h.code+'" title="이 영웅은 내가 없음 — 추천에서 제외"><span class="lg">✕ 없는 영웅</span><span class="xs">✕</span></button></div>';
+  return '<div class="'+cls+'" data-rec="'+h.code+'" data-reccard="'+h.code+'">'
     + '<div class="r1">'
     +   '<div class="rank">'+(idx+1)+'</div>'
     +   '<div class="ava"><span class="ini">'+esc(h.name.slice(0,1))+'</span><img src="'+IMG(h.code)+'" loading="lazy" onerror="this.style.display=\'none\'">'+elIcon(h.el)+jobIcon(h.job)+'</div>'
@@ -2603,6 +2850,7 @@ function recCard(r, idx, rec){
     + (setLine?'<div class="sets">'+setLine+'</div>':'')
     + (function(){
         const tg=[];
+        if(isGuard) tg.push('<span class="tg pb guard">🛡️ 밴가드</span>');
         if(r.danger) tg.push('<span class="tg risk">⚠ 내 조합 카운터</span>');
         if(rec && rec.kind==='pre' && fitOn()){
           const dt0 = deckThreat(h.code);
@@ -2616,12 +2864,12 @@ function recCard(r, idx, rec){
         if(myTurn){
           const pb=playerBadge(h.code); if(pb) tg.push(pb);
           if(r.needFire) tg.push('<span class="pb warn">🔥 딜러 확보 필수</span>');
-          if(r.ace) tg.push('<span class="pb ace">🛡 밴가드 에이스 보호</span>');
+          if(r.ace && !isGuard) tg.push('<span class="pb ace">🛡️ 밴가드 보호</span>');   // 3픽은 위의 밴가드 태그로 충분
           if(r.rm) tg.push('<span class="pb rm">🏅 롤모델 시너지</span>');
         }
         return tg.length? '<div class="tags">'+tg.join('')+'</div>' : '';
       })()
-    + '<ul class="why">'+why+'</ul>'
+    + '<ul class="why">'+guardWhy+why+'</ul>'
     + acts
     + '</div>';
 }
@@ -2629,6 +2877,91 @@ function teamEstimate(){
   const mine = sortedSet(S.my.filter(c=>c && c!==S.oppBan));
   const foe  = sortedSet(S.opp.filter(c=>c && c!==S.myBan));
   return setEstimate(mine, foe);
+}
+/* ---------------- v4.5.3 : 4:4 배치 · 쌀 운영 방향 ----------------
+   밴픽이 끝난 4:4에서 "누가 앞 · 누가 뒤 · 누구부터 끊을지"를 태그·직업 데이터로 한 장에 정리한다. */
+function myFinal4(){ return sortedSet(S.my.filter(function(c){ return c && c!==S.oppBan; })); }
+function oppFinal4(){ return sortedSet(S.opp.filter(function(c){ return c && c!==S.myBan; })); }
+function tagHas(h, t){ if(!h) return false; return (String(h.tags||'').split(',').indexOf(t)>=0) || (h.tag||[]).indexOf(t)>=0; }
+function anyTag(h, list){ for(let i=0;i<list.length;i++){ if(tagHas(h, list[i])) return list[i]; } return ''; }
+function frontScore(code){
+  const h=H[code]; if(!h) return -99;
+  let s=0;
+  if(h.job==='knight') s+=3.0;
+  if(tagHas(h,'tank')) s+=2.2;
+  if(anyTag(h,['보호막','피해분배','도발','면역'])) s+=1.6;
+  if(anyTag(h,['반격','불사'])) s+=0.9;
+  if(tagHas(h,'bruiser')) s+=0.8;
+  if(tagHas(h,'nuker')) s-=2.4;
+  if(h.job==='mage'||h.job==='assassin'||h.job==='ranger') s-=1.4;
+  s += Math.min(1.2, (h.pick||0)/18);
+  return s;
+}
+function backScore(code){
+  const h=H[code]; if(!h) return -99;
+  let s=0;
+  if(tagHas(h,'nuker')) s+=2.6;
+  if(tagHas(h,'support')||tagHas(h,'heal')) s+=2.0;
+  if(h.job==='mage'||h.job==='assassin'||h.job==='ranger'||h.job==='manauser') s+=1.2;
+  if(tagHas(h,'tank')||h.job==='knight') s-=2.6;
+  s += Math.min(1.4, (h.pick||0)/15);
+  return s;
+}
+function battlePlan(){
+  const mine=myFinal4(), foe=oppFinal4();
+  if(mine.length<3 || foe.length<3) return {ok:false};
+  const FRONT_W=['보호막','피해분배','도발','면역','반격','불사'];
+  const front = mine.slice().sort(function(a,b){ return frontScore(b)-frontScore(a); })[0];
+  const rest = mine.filter(function(c){ return c!==front; });
+  const back = (rest.length ? rest : mine).slice().sort(function(a,b){ return backScore(b)-backScore(a); })[0];
+  // 상대 1순위 공략 타겟 — 이미 있는 후밴 가치(scoreBan)를 그대로 활용
+  let tgt = foe[0], tsc = -1e9;
+  foe.forEach(function(c){ const r=scoreBan(c); if(r && r.sc>tsc){ tsc=r.sc; tgt=c; } });
+  const fh=H[front], bh=H[back], th=H[tgt];
+  const fWhy = (function(){
+    const tags=FRONT_W.map(function(t){ return tagHas(fh,t)?({보호막:'보호막',피해분배:'피해 분배',도발:'도발 어그로',면역:'면역',반격:'반격',불사:'불사 생존'})[t]:''; }).filter(Boolean);
+    if(tagHas(fh,'tank')||fh.job==='knight') tags.unshift('탱커');
+    return (tags.slice(0,2).join('·')||'전열 탱커')+'로 상대 선턴을 받아냅니다';
+  })();
+  const bWhy = (function(){
+    if(tagHas(bh,'nuker')) return '핵심 딜러, 점사·광역기 앞에서 보호·행게로 살리기';
+    if(tagHas(bh,'heal')||tagHas(bh,'support')) return '힐·서포트, 살아야 조합이 굴러갑니다';
+    if(tagHas(bh,'control')) return '디버퍼, 선턴마다 꾸준히 걸어주기';
+    return '조합 핵심, 먼저 지워지지 않게';
+  })();
+  const tWhy = (function(){
+    if(tagHas(th,'부활')) return '부활 요원, 먼저 끊어 되살림 차단';
+    if(tagHas(th,'opener')||tagHas(th,'speed')) return '속도 오프너, 선턴 먼저 차단';
+    if(tagHas(th,'nuker')) return '핵심 딜러, 최우선 점사';
+    if(tagHas(th,'heal')||tagHas(th,'support')) return '힐·서포트, 회복 차단';
+    if(tagHas(th,'control')) return '디버퍼·CC, 먼저 제거';
+    return '상대 조합 축, 먼저 제거';
+  })();
+  const myOp=mine.filter(function(c){ return tagHas(H[c],'opener')||tagHas(H[c],'speed'); }).length;
+  const opOp=foe.filter(function(c){ return tagHas(H[c],'opener')||tagHas(H[c],'speed'); }).length;
+  const speed = myOp>opOp ? '오프너 우위, 선턴 잡고 시작'
+              : (myOp<opOp ? '속도 열세, 버티며 반각 노리기' : '속도 반반, 상대 오프너 견제');
+  const WARN=[['부활','부활 차단'],['회복불가','회복 불가 주의'],['반격','반격 주의'],['추가공격','추가타 주의'],
+              ['불사','불사 벗기기'],['기절','기절 CC'],['수면','수면 CC'],['침불','침불'],['침묵','침묵 주의'],
+              ['관통','관통 딜'],['소멸','소멸 주의'],['고정피해','고정피해 주의']];
+  const warns=[];
+  foe.forEach(function(c){ WARN.forEach(function(w){ if(tagHas(H[c],w[0]) && warns.indexOf(w[1])<0) warns.push(w[1]); }); });
+  const plan = speed + (warns.length? ' · '+warns.slice(0,2).join(' · ') : '');
+  return {ok:true, front:{code:front, name:H[front].name, why:fWhy},
+          back:{code:back, name:H[back].name, why:bWhy},
+          target:{code:tgt, name:H[tgt].name, why:tWhy}, plan:plan,
+          final: (!!S.myBan && !!S.oppBan)};
+}
+function battlePlanHTML(){
+  const p=battlePlan();
+  if(!p.ok) return '';
+  return '<div class="planBox'+(p.final?'':' pre')+'">'
+    + '<div class="pbTop">🎯 4:4 운영 <span class="pbSub">'+(p.final?'최종 밴 반영':'최종 밴 전 기준')+'</span></div>'
+    + '<div class="pRow"><b class="fr">전열</b><span><i>'+esc(p.front.name)+'</i> — '+esc(p.front.why)+'</span></div>'
+    + '<div class="pRow"><b class="bk">후열</b><span><i>'+esc(p.back.name)+'</i> — '+esc(p.back.why)+'</span></div>'
+    + '<div class="pRow"><b class="tg2">타겟</b><span><i>'+esc(p.target.name)+'</i> — '+esc(p.target.why)+'</span></div>'
+    + '<div class="pNote">'+esc(p.plan)+'</div>'
+    + '</div>';
 }
 function summaryHTML(){
   const t = teamEstimate();
@@ -2641,6 +2974,7 @@ function summaryHTML(){
     return s&&s.eq ? '<span class="tg">'+nm(c)+' · '+esc(s.eq)+(s.art?' · '+esc(s.art):'')+'</span>' : '';
   }).filter(Boolean).slice(0,4).join(' ');
   return '<div style="padding:9px;display:grid;gap:8px">'
+    + battlePlanHTML()
     + '<div class="mv">'
     +   '<div class="mvHead">4:4 예상 <b class="'+(t.est<50?'low':'')+'">'+pc(t.est)+'%</b><span>내 팀 승률</span></div>'
     +   '<div class="mvBar"><i style="width:'+t.est+'%"></i></div>'
@@ -2895,7 +3229,18 @@ function reset(){
   const miss=S.missing, first=S.first, owned=S.owned, ownMode=S.ownMode;
   S=fresh(); S.missing=miss; S.first=first; S.owned=owned; S.ownMode=ownMode;
   rebuildMissing();
-  ACTIVE=null; renderAll(); save(); toast('새 밴픽을 시작합니다');
+  ACTIVE=null; clearDraft(); renderAll(); save(); toast('새 밴픽을 시작합니다');
+}
+/* v4.5.3 : 방금 넣은 자리와 다음 단계를 한 줄로 보여준다 */
+function slotLabel(st){
+  if(!st) return '—';
+  if(st.t==='pre')  return (st.s==='my'?'내':'상대')+' 프리밴 '+(st.i+1);
+  if(st.t==='pick') return (st.s==='my'?'내 ':'상대 ')+(st.i+1)+'픽'+(st.i===2?'(🛡️ 밴가드)':'');
+  return (st.s==='my'?'내 ':'상대 ')+'최종 밴';
+}
+function appliedToast(a, name){
+  const nx=nextStep();
+  toast('✓ ['+slotLabel(a)+'] '+name+' 입력'+(nx?' → 다음: '+slotLabel(nx):' → 4:4 완료'));
 }
 function applyCode(code, silent){
   const a=activeStep();
@@ -2909,7 +3254,7 @@ function applyCode(code, silent){
       if(idx===2){ toast('3픽은 밴가드 — 최종 밴할 수 없습니다'); return false; }
       snapshot(); S.myBan=code; ACTIVE=null;
       save(); renderAll();
-      if(!silent) toast(h.name+' 최종 밴');
+      if(!silent) appliedToast(a, h.name);
       return true;
     } else {
       const idx=S.my.indexOf(code);
@@ -2917,7 +3262,7 @@ function applyCode(code, silent){
       if(idx===2){ toast('내 3픽은 밴가드 — 밴될 수 없습니다'); return false; }
       snapshot(); S.oppBan=code; ACTIVE=null;
       save(); renderAll();
-      if(!silent) toast(h.name+' 이(가) 밴됨으로 기록');
+      if(!silent) appliedToast(a, h.name);
       return true;
     }
   }
@@ -2928,7 +3273,7 @@ function applyCode(code, silent){
   }
   snapshot(); slotSet(a,code); ACTIVE=null;
   save(); renderAll();
-  if(!silent) toast(h.name+' → '+(a.t==='pre'?'프리밴':(a.t==='pick'?'픽':'최종 밴'))+' 적용');
+  if(!silent){ appliedToast(a, h.name); ensureActiveVisible(); }
   return true;
 }
 function clearSlot(st){
@@ -2941,6 +3286,7 @@ function clearSlot(st){
 }
 function setActive(st){
   ACTIVE=st;
+  saveDraft();
   renderBoard(); renderRecs(); renderStrip(); renderGrid();
 }
 
@@ -3208,13 +3554,18 @@ function measureMob(){
   if(top) document.documentElement.style.setProperty('--topH', Math.round(top.getBoundingClientRect().height)+'px');
   if(bar) document.documentElement.style.setProperty('--barH', Math.round(bar.getBoundingClientRect().height||0)+'px');
 }
+/* v4.5.3 : 분할 화면(짧은 높이) 감지 — CSS 미디어 쿼리와 같은 조건 */
+const MQ_COMPACT = (window.matchMedia ? window.matchMedia('(max-width:920px) and (max-height:560px)') : {matches:false});
+function syncCompact(){ COMPACT = !!MQ_COMPACT.matches; measureMob(); }
 function setTab(name){
   TAB=name; document.body.dataset.tab=TAB;
   document.querySelectorAll('.mobTabs button').forEach(function(b){ b.classList.toggle('on', b.dataset.tab===TAB); });
+  saveDraft();
   measureMob();
   try{ window.scrollTo(0,0); }catch(e){}
   if(name==='check') renderMobCheck();
-  if(name==='board') renderMobBar();
+  renderMobBar();
+  if(name==='board') setTimeout(focusActiveSlot, 40);
 }
 function mobTurn(){
   const a=activeStep();
@@ -3222,6 +3573,63 @@ function mobTurn(){
   if(a.t==='pre') return [(a.s==='my'?'내 ':'상대 ')+'프리밴',(a.i+1)+'/2'];
   if(a.t==='pick') return [(a.s==='my'?'내 ':'상대 ')+(a.i+1)+'픽', a.i===2 ? '밴가드' : ''];
   return [(a.s==='my'?'내 ':'상대 ')+'최종 밴',''];
+}
+/* v4.5.3 : 어느 탭에 있든 상단에 항상 보이는 현재 단계 배지 (내 턴=파랑 / 상대 턴=빨강 / 최종 밴=금) */
+function stageBadge(){
+  const a=activeStep();
+  if(!a) return {cls:'done', ic:'✅', txt:'밴픽 완료', note:'4:4 점검'};
+  const me = a.s==='my';
+  if(a.t==='pre') return {cls:me?'me':'op', ic:me?'🔵':'🔴',
+    txt:(me?'내 ':'상대 ')+'프리밴 '+(a.i+1)+'/2 선택 중', note:(a.i===0?'첫 칸':'마지막 칸')};
+  if(a.t==='pick'){
+    const guard = a.i===2;
+    return {cls:(me?'me':'op')+(guard?' guard':''), ic: guard?'🛡️':(me?'🔵':'🔴'),
+      txt:(me?'내 ':'상대 ')+(a.i+1)+'픽'+(guard?'(밴가드)':'')+' 선택 중',
+      note: guard?'최종 밴 면제':pickOrderText(a.i)};
+  }
+  return {cls:'ban '+(me?'me':'op'), ic:'⚔️',
+    txt:(me?'내 ':'상대 ')+'최종 밴 선택', note:me?'상대 4명 중 1명':'내 4명 중 1명'};
+}
+function stepNav(dir){
+  const all=steps().filter(function(st){ return !(st.t==='ban' && st.s==='opp' && S.noOppBan); });
+  const cur=activeStep();
+  let idx = cur ? all.findIndex(function(st){ return st.t===cur.t && st.s===cur.s && (st.i||0)===(cur.i||0); }) : -1;
+  if(idx<0) idx = all.length-1;
+  const k = Math.max(0, Math.min(all.length-1, idx+dir));
+  if(k===idx && ACTIVE===null){ return; }
+  ACTIVE = all[k];
+  saveDraft();
+  renderBoard(); renderRecs(); renderGrid(); renderStrip(); renderMobCheck();
+  const bb=stageBadge();
+  toast('칸 이동 — '+bb.txt.replace(' 선택 중',''));
+}
+/* v4.5.3 : 모바일 보드 탭에서 '지금 고르는 칸'이 화면에 바로 보이도록 자동 스크롤 */
+function focusActiveSlot(){
+  if(!(window.matchMedia && window.matchMedia('(max-width:920px)').matches)) return;
+  if(TAB!=='board') return;
+  const a=activeStep();
+  let el=null;
+  if(a && a.t==='ban'){
+    el = document.querySelector(a.s==='my' ? '#sideOpp' : '#sideMy') || $('strip');
+  } else if(a){
+    el = document.querySelector('.slot.active');
+  }
+  if(!el) el = $('strip') || $('comp');
+  if(!el) return;
+  try{ el.scrollIntoView({block:'center', behavior:'instant'}); }
+  catch(e){ try{ el.scrollIntoView(); }catch(e2){} }
+}
+/* 영웅을 넣은 뒤 다음 칸이 화면 밖이면 그때만 다시 맞춘다 (매번 튀지 않게) */
+function ensureActiveVisible(){
+  if(!(window.matchMedia && window.matchMedia('(max-width:920px)').matches)) return;
+  if(TAB!=='board') return;
+  const a=activeStep();
+  const el = (a&&a.t!=='ban') ? document.querySelector('.slot.active') : null;
+  if(!el) return;
+  const r=el.getBoundingClientRect();
+  const top=(document.querySelector('.top')||{getBoundingClientRect:function(){return {height:0};}}).getBoundingClientRect().height;
+  const bar=(document.querySelector('#mobBar')||{getBoundingClientRect:function(){return {height:0};}}).getBoundingClientRect().height;
+  if(r.top < top+bar+6 || r.bottom > window.innerHeight - 56) focusActiveSlot();
 }
 function mobAvatars(list, ban){
   let out='';
@@ -3236,13 +3644,28 @@ function mobAvatars(list, ban){
 }
 function renderMobBar(){
   const bar=$('mobBar'); if(!bar) return;
-  const t=mobTurn();
-  bar.innerHTML='<div class="mbTurn"><b>'+esc(t[0])+'</b>'+(t[1]?'<span>· '+esc(t[1])+'</span>':'')+'</div>'
-    + '<div class="mbSide me"><i>내</i><div class="mbAv">'+mobAvatars(S.my,S.oppBan)+'</div></div>'
-    + '<div class="mbVs">VS</div>'
-    + '<div class="mbSide op"><i>상대</i><div class="mbAv">'+mobAvatars(S.opp,S.myBan)+'</div></div>'
-    + '<div class="mbGo">▾</div>';
-  bar.setAttribute('aria-label', esc(t[0])+' '+esc(t[1])+' — 눌러서 보드 열기');
+  const b=stageBadge();
+  const editing = !!(ACTIVE && slotGet(ACTIVE));
+  const myN=S.my.filter(Boolean).length, opN=S.opp.filter(Boolean).length;
+  const all=steps().filter(function(st){ return !(st.t==='ban' && st.s==='opp' && S.noOppBan); });
+  const cur=activeStep();
+  const curIdx = cur ? all.findIndex(function(st){ return st.t===cur.t && st.s===cur.s && (st.i||0)===(cur.i||0); }) : -1;
+  bar.innerHTML =
+      '<div class="mbRow1">'
+    +   '<div class="mbTurn '+b.cls+(editing?' edit':'')+'" title="'+esc(b.note)+'"><span class="ic">'+b.ic+'</span><b>'+esc(b.txt)+'</b></div>'
+    +   '<div class="mbProg">내 <b>'+myN+'</b>/5 · 상대 <b>'+opN+'</b>/5</div>'
+    +   '<div class="mbNav">'
+    +     '<button class="mbArrow" id="mbPrev" aria-label="이전 칸" '+(curIdx<=0?'disabled':'')+'>◀</button>'
+    +     '<button class="mbArrow" id="mbNext" aria-label="다음 칸" '+(curIdx<0||curIdx>=all.length-1?'disabled':'')+'>▶</button>'
+    +   '</div>'
+    + '</div>'
+    + '<div class="mbRow2">'
+    +   '<div class="mbSide me"><i>내</i><div class="mbAv">'+mobAvatars(S.my,S.oppBan)+'</div></div>'
+    +   '<div class="mbVs">VS</div>'
+    +   '<div class="mbSide op"><i>상대</i><div class="mbAv">'+mobAvatars(S.opp,S.myBan)+'</div></div>'
+    +   '<div class="mbGo">▾</div>'
+    + '</div>';
+  bar.setAttribute('aria-label', esc(b.txt)+' — 눌러서 보드 열기');
   measureMob();
 }
 function renderMobCheck(){
@@ -3269,7 +3692,7 @@ function renderAll(){
   $('segFirst').querySelectorAll('button').forEach(b=>b.classList.toggle('on', b.dataset.first===S.first));
   renderBoard(); renderRecs(); renderGrid();
   $('btnOwn').innerHTML = '<span class="lg">👥 내 영웅함 '+ownCount()+'/'+LIST.length+'</span>'
-    + '<span class="sm">👥 '+ownCount()+'/'+LIST.length+'</span>';
+    + '<span class="sm">👥 '+ownCount()+'/'+LIST.length+'</span><span class="xs">👥</span>';
   document.body.dataset.tab = TAB;
   measureMob();
   $('subTitle').textContent = (fitOn()? 'VLSI 맞춤 · ':'')+(MS? '최신 실전 '+MS.matches.toLocaleString()+'판 · ' : '')+META.season.name;
@@ -3304,12 +3727,12 @@ document.addEventListener('click', function(ev){
     if(a && a.t==='ban' && a.s==='my' && st.t==='pick' && st.s==='opp'){
       if(!code) return;
       if(st.i===2){ toast('3픽은 밴가드 — 최종 밴 불가'); return; }
-      snapshot(); S.myBan=code; ACTIVE=null; save(); renderAll(); toast(H[code].name+' 최종 밴'); return;
+      snapshot(); S.myBan=code; ACTIVE=null; save(); renderAll(); appliedToast({t:'ban',s:'my'}, H[code].name); return;
     }
     // 완료 상태에서도 채워진 슬롯을 클릭하면 그 자리를 바로 수정 모드로
     if(!a && code && st.t!=='ban'){ setActive(st); toast('수정 모드 — 다른 영웅을 고르면 교체, 비우기로 삭제'); return; }
     if(a && a.t==='ban' && a.s==='opp' && st.t==='pick' && st.s==='my' && code){
-      snapshot(); S.oppBan=code; S.skipOppBan=false; ACTIVE=null; save(); renderAll(); return;
+      snapshot(); S.oppBan=code; S.skipOppBan=false; ACTIVE=null; save(); renderAll(); appliedToast({t:'ban',s:'opp'}, H[code].name); return;
     }
     if(st.t==='ban') return;
     setActive(st);
@@ -3328,6 +3751,12 @@ document.addEventListener('click', function(ev){
   if(hero){ applyCode(hero.dataset.hero); return; }
   const act=t.closest('[data-act]');
   if(act){ if(act.dataset.act==='reset') reset(); if(act.dataset.act==='undo') undo(); if(act.dataset.act==='finish'){ snapshot(); S.noOppBan=true; ACTIVE=null; save(); renderAll(); toast('상대 최종 밴 기록 없이 마쳤습니다'); } return; }
+  /* v4.5.3 : 분할 화면(초압축)에서는 카드 전체를 누르면 바로 적용 */
+  const rcard=t.closest('[data-reccard]');
+  if(rcard && COMPACT){ applyCode(rcard.dataset.reccard); return; }
+  /* v4.5.3 : 단계 배지의 이전/다음 칸 이동 */
+  const mnav=t.closest('.mbArrow');
+  if(mnav){ if(mnav.id==='mbPrev') stepNav(-1); else stepNav(1); return; }
 
   if(t.closest('#segFirst')){
     const b=t.closest('button'); if(!b) return;
@@ -3469,14 +3898,19 @@ document.addEventListener('click', function(ev){
 load();
 renderChips();
 renderFit();
+syncCompact();
+document.body.dataset.tab = TAB;   // 저장된 탭 복원 (기본 board)
+document.querySelectorAll('.mobTabs button').forEach(function(b){ b.classList.toggle('on', b.dataset.tab===TAB); });
 renderAll();
 syncChip();
 trySync();
 measureMob();
-window.addEventListener('resize', measureMob);
-window.addEventListener('orientationchange', function(){ setTimeout(measureMob,120); });
+window.addEventListener('resize', function(){ syncCompact(); });
+window.addEventListener('orientationchange', function(){ setTimeout(function(){ syncCompact(); },120); });
+if(MQ_COMPACT.addEventListener) MQ_COMPACT.addEventListener('change', syncCompact);
 setTimeout(measureMob, 400);
 window.__app = {get S(){return S;}, get recs(){return RECS;}, H:H, LIST:LIST, get total(){return LIST.length;}, applyCode:applyCode, renderAll:renderAll, get step(){return activeStep();}, clearSlot:clearSlot, setActive:setActive, get hist(){return HIST.length;}, banCandidates:banCandidates, setEstimate:setEstimate, get MS(){return MS;},
+    saveDraft:saveDraft, loadDraft:loadDraft, clearDraft:clearDraft, get DKEY(){return DKEY;}, stageBadge:stageBadge, stepNav:stepNav, get compact(){return COMPACT;}, syncCompact:syncCompact, battlePlan:battlePlan, battlePlanHTML:battlePlanHTML, myFinal4:myFinal4, oppFinal4:oppFinal4, focusActiveSlot:focusActiveSlot, slotLabel:slotLabel,
     pStat:pStat, get FIT(){return FIT;}, setFit:function(v){ FIT.on=!!v; try{localStorage.setItem('e7rta.fit', FIT.on?'1':'0');}catch(e){} renderFit(); renderAll(); },
     playerBadge:playerBadge, deckThreat:deckThreat, fireOf:fireOf, fireStatus:fireStatus, fireCount:fireCount, aceInfo:aceInfo, myCore:myCore, scorePick:scorePick, get player(){return playerStats;}, get fitOn(){return fitOn();}, roleModel:roleModel, rmCombo:rmCombo, rmTriple:rmTriple, rmPrebanN:rmPrebanN, rmModels:rmModels, DEFAULT_UNOWNED:DEFAULT_UNOWNED, applyDefaultUnowned:applyDefaultUnowned, get missing(){return S.missing;}, patch:patOf, get PATD(){return PATD;}, setTab:setTab, get tab(){return TAB;}, teamEstimate:teamEstimate, renderMobCheck:renderMobCheck, renderMobBar:renderMobBar, mobTurn:mobTurn};
 })();
