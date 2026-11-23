@@ -4139,7 +4139,7 @@ function guideHTML(p){
   /* ② 상대 위협 · 대응 */
   let l2='';
   g.threats.forEach(function(t,i){
-    const art=t.art && t.art.a ? '<div class="pbTar">🏺 '+esc(t.art.name)+' '+t.art.pct+'% — '+esc(t.art.a.warn)+'</div>' : '';
+    const art=t.art ? '<div class="pbTar">🏺 '+esc(t.art.name)+' '+t.art.pct+'%'+(t.art.a?' — '+esc(t.art.a.warn):'')+'</div>' : '';
     l2+='<div class="pbT"><div class="pbTh">'+(i<2?'<span class="pbRk">위험</span>':'')+nmE(t)+'</div>'
       + '<div class="pbTw">위협 — '+esc(t.why)+'</div>'
       + art
