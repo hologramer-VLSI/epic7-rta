@@ -5233,10 +5233,16 @@ function renderMobCheck(){
     + (t.worst&&t.worst.wr<50?'<div class="mvRow bad">▼ '+esc(H[t.worst.a].name)+' vs '+esc(H[t.worst.b].name)+' '+pc(t.worst.wr)+'% <small>('+t.worst.n+'판)</small></div>':'')
     + '</div>';
   /* v4.7 : 점검 탭 맨 위에 4:4 운영(스킬 금기·속성·타겟) 카드
-     v4.8 : 밴픽이 끝나 anBody가 이미 운영 카드를 담고 있으면 두 번 넣지 않는다 */
+     v4.9 : ⚡ 3초 실전 브리핑이 항상 맨 위 — 승률·조합 점검보다 먼저 읽힌다.
+            anBody가 운영 카드를 이미 담고 있으면 그 카드만 빼고 나머지만 아래에 붙인다. */
   const anHtml = $('anBody') ? $('anBody').innerHTML : '';
-  if(anHtml.indexOf('class="planBox') < 0) html = battlePlanHTML() + html;
-  html += anHtml;
+  let anRest = anHtml;
+  if(anHtml.indexOf('class="planBox') >= 0){
+    const tmp = document.createElement('div'); tmp.innerHTML = anHtml;
+    const pb = tmp.querySelector('.planBox'); if(pb && pb.parentNode) pb.parentNode.removeChild(pb);
+    anRest = tmp.innerHTML;
+  }
+  html = battlePlanHTML() + html + anRest;
   body.innerHTML=html;
 }
 
