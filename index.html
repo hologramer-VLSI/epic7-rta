@@ -4143,7 +4143,7 @@ function formationPlan(mine, foe){
     if(k.m && k.p==='N' && at==='front') warn.push(H[c].name+'는 전열이면 패시브가 죽습니다');
     if(k.m && k.p==='K' && at==='back')  warn.push(H[c].name+'는 후열이면 패시브가 죽습니다');
     if(!k.m && k.p==='F' && at!=='front' && mine.some(function(x){ const kk=fKit(x); return kk && kk.m && kk.p==='F'; }))
-      warn.push(H[c].name+'는 전열 선호 — 전열이 '+H[best.f].name+'로 고정되어 '+FSLOT[at==='mid'?'A':'B']+'에 섭니다');
+      warn.push(H[c].name+'는 전열 선호 — 전열이 '+H[best.f].name+'로 고정되어 '+({front:'전열',mid:'중앙',back:'후열'}[at]||at)+'에 섭니다');
   });
   const alt = (second && second.s < best.s) ? {
     front:H[second.f].name, back:H[second.b].name,
