@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#070a12">
-<title>에픽세븐 실레나 밴픽 v4.10 · VLSI 전적 맞춤</title>
+<title>에픽세븐 실레나 밴픽 v4.11 · VLSI 전적 맞춤</title>
 <style>
 :root{
   --bg:#070a12; --bg2:#0b1020; --panel:#0f1729; --panel2:#131f36;
@@ -121,6 +121,29 @@ button{font-family:inherit}
   50%{box-shadow:0 0 0 2px rgba(255,212,92,.95),0 0 26px rgba(255,212,92,.55);border-color:#fff0bd}
 }
 .slot.active .pic{box-shadow:0 0 12px rgba(255,212,92,.5)}
+/* v4.11 : 채워진 슬롯을 눌러 '그 픽 차례의 당시 추천'을 보는 중 */
+.slot.viewing{border-color:#a06bff;box-shadow:0 0 0 1px rgba(160,107,255,.62),0 0 20px rgba(160,107,255,.32)}
+.slot.viewing .nm{color:#efe6ff}
+.slot.viewing .pic{box-shadow:0 0 12px rgba(160,107,255,.55)}
+.histBar{padding:7px 10px 8px;display:grid;gap:5px;border-bottom:1px solid #3a2a66;
+  background:linear-gradient(135deg,rgba(58,36,104,.92),rgba(18,24,45,.92));border-left:3px solid #a06bff;
+  animation:hbIn .22s ease-out}
+@keyframes hbIn{from{opacity:.2;transform:translateY(-3px)}to{opacity:1;transform:none}}
+.histBar .hbTop{display:flex;align-items:center;gap:6px;flex-wrap:wrap;min-width:0}
+.histBar .hbTop b{font-size:12px;font-weight:900;color:#f3ecff;letter-spacing:-.2px}
+.histBar .hbSel{font-size:10px;font-weight:800;color:#dccdff;background:rgba(160,107,255,.18);
+  border:1px solid rgba(160,107,255,.45);border-radius:5px;padding:1px 6px;white-space:nowrap}
+.histBar .hbSel b{font-size:10px;color:#fff;font-weight:900}
+.histBar .hbRow{display:flex;align-items:center;gap:5px;min-width:0}
+.histBar .hbNote{font-size:9.5px;color:#b9abdc;line-height:1.3;flex:1;min-width:0}
+.histBar .hbNote b{color:#efe6ff}
+.histBar .btn{height:25px;font-size:10.5px;padding:0 8px;border-radius:7px;flex:none}
+.badge.hist{background:#2b1c50;color:#ddccff;border-color:#5c3fa8}
+.rc.sel,.bc.sel{border-color:#a06bff;background:linear-gradient(180deg,rgba(56,34,102,.62),rgba(15,21,35,.95))}
+.rc.sel::before{background:linear-gradient(180deg,#c9a6ff,#7a44d8)}
+.rc.sel .rank{color:#dccdff}
+.tg.sel{background:rgba(160,107,255,.20);color:#e9ddff;border-color:rgba(160,107,255,.55)}
+.histSelLbl{font-size:9.5px;font-weight:800;color:#c6b7ea;text-align:center;padding:4px 0 1px;letter-spacing:-.1px}
 .slot .guard{position:absolute;left:-5px;top:-6px;font-size:10px;background:#152742;border:1px solid #2f4770;border-radius:6px;padding:0 3px;color:#9fc0ff}
 .slot .close{position:absolute;right:3px;bottom:3px;width:16px;height:16px;border-radius:5px;border:1px solid #3b557f;background:#0b1526;color:#9db3d4;
   font-size:9px;line-height:1;display:none;place-items:center;cursor:pointer;padding:0}
@@ -925,6 +948,12 @@ button{font-family:inherit}
   .mbArrow:disabled{opacity:.3}
   body[data-tab="board"] .mbRow2{display:none}
   body[data-tab="board"] .mobBar{padding:3px 7px}
+  /* v4.11 : 복기 배너 — 모바일에서도 한 줄로 눌러서 복귀 */
+  .histBar{padding:5px 8px 6px;gap:3px}
+  .histBar .hbTop b{font-size:11px}
+  .histBar .hbSel{font-size:9px;padding:1px 5px}
+  .histBar .hbNote{font-size:9px}
+  .histBar .btn{height:24px;font-size:10px;padding:0 7px}
   /* 추천 카드 설명 압축 — 핵심 2줄까지만 */
   .rc .why li:nth-child(n+3){display:none}
   .rc .tags .tg:nth-child(n+3){display:none}
@@ -991,6 +1020,10 @@ button{font-family:inherit}
   .rc .why li.guard1{display:block!important}
   .rc .why li.guard1+li{display:none}
   .rc .acts{display:none}          /* 분할 화면: 카드 전체를 탭하면 바로 적용 */
+  /* v4.11 : 복기 화면에서는 교체 버튼을 반드시 보여준다(카드 전체 탭은 교체가 아님) */
+  body.histmode .rc .acts{display:flex}
+  body.histmode .rc .acts .btn,body.histmode .rc .acts .tg{height:22px;font-size:9.5px;padding:0 6px;display:flex;align-items:center;justify-content:center}
+  body.histmode .histBar .hbNote{display:none}
   .planBox{padding:4px 6px;gap:1px;border-radius:9px}
   .planBox .pbTop{font-size:9.5px}
   .planBox .pRow{font-size:9px;grid-template-columns:27px minmax(0,1fr);gap:4px}
@@ -1115,7 +1148,7 @@ button{font-family:inherit}
   <div class="top">
     <div class="brand">
       <div class="mark">⚔️</div>
-      <div><b>에픽세븐 실레나 밴픽<span class="vtag">v4.10</span></b><span id="subTitle">VLSI 맞춤 · 최신 실전</span></div>
+      <div><b>에픽세븐 실레나 밴픽<span class="vtag">v4.11</span></b><span id="subTitle">VLSI 맞춤 · 최신 실전</span></div>
     </div>
     <div class="spacer"></div>
     <span class="chip data" id="dataChip" title="실제 전적검색 전투 기록">🏆 실전 <b>—</b></span><span class="chip" id="seasonChip">2026 폴 · ss21</span>
@@ -1148,6 +1181,7 @@ button{font-family:inherit}
           <div class="rmStrip" id="rmStrip" style="display:none"></div>
           <div class="caseStrip" id="caseStrip" style="display:none"></div>
         </div>
+        <div class="histBar" id="histBar" style="display:none"></div>
         <div class="reclist" id="recList"></div>
         <div class="recFoot"><span id="recFoot">전체 풀 · 미보유 제외</span><div class="spacer"></div><span id="recCount"></span></div>
       </section>
@@ -1163,7 +1197,7 @@ button{font-family:inherit}
           </div>
           <span class="chip" id="phaseChip">프리밴</span>
           <div class="spacer"></div>
-          <span class="sub hideSm" id="boardNote">칸을 누르면 고치기 · 영웅을 누르면 들어감</span>
+          <span class="sub hideSm" id="boardNote">칸을 누르면 그때 추천 · ✕는 비우기</span>
         </div>
 
         <div class="board">
@@ -1853,6 +1887,7 @@ const KEY='e7rta.v3';
 function fresh(){ return {first:'me', myPre:[null,null], oppPre:[null,null], my:[null,null,null,null,null], opp:[null,null,null,null,null], myBan:null, oppBan:null, noOppBan:false, missing:{}, owned:{}, ownMode:'missing'}; }
 let S = fresh();
 let ACTIVE = null;            // {t:'pre'|'pick'|'ban', s:'my'|'opp', i}
+let HISTVIEW = null;         // v4.11 : 복기 중인 칸 {t,s,i} — 채워진 슬롯 본체 클릭
 let HIST = [];                // undo stack
 let FILTER = {el:'', job:'', q:''};
 let TAB='board';
@@ -2037,6 +2072,43 @@ function slotSet(st,code){
   else if(st.t==='pick') S[st.s][st.i]=code;
   else if(st.t==='ban'){ if(st.s==='my') S.myBan=code; else S.oppBan=code; }
 }
+
+/* ---------------- v4.11 : '그 픽 차례의 당시 추천' 재계산 ----------------
+   보드의 실제 밴픽 순서(steps)에서 대상 칸과 그 뒤 칸을 모두 비운 상태 = 그 차례 직전 보드.
+   이 상태로 scorePick/scorePreban/banCandidates 를 다시 돌리면 당시 화면과 같은 목록이 나온다.
+   (스냅샷을 따로 저장하지 않으므로 새로고침·localStorage 복원 뒤에도 그대로 동작한다) */
+const sameStep = function(a,b){ return !!(a && b && a.t===b.t && a.s===b.s && (a.i||0)===(b.i||0)); };
+function boardSnapshotState(){
+  return {first:S.first, myPre:S.myPre.slice(), oppPre:S.oppPre.slice(),
+          my:S.my.slice(), opp:S.opp.slice(), myBan:S.myBan, oppBan:S.oppBan,
+          noOppBan:!!S.noOppBan, missing:S.missing, owned:S.owned, ownMode:S.ownMode};
+}
+function setSlotOn(stt, st, code){
+  if(st.t==='pre'){ if(st.s==='my') stt.myPre[st.i]=code; else stt.oppPre[st.i]=code; }
+  else if(st.t==='pick'){ if(st.s==='my') stt.my[st.i]=code; else stt.opp[st.i]=code; }
+  else { if(st.s==='my') stt.myBan=code; else stt.oppBan=code; }
+}
+function stepOrderIndex(st){
+  const all=steps();
+  for(let k=0;k<all.length;k++){ if(sameStep(all[k],st)) return k; }
+  return -1;
+}
+function stateBeforeStep(st){
+  const all=steps(), idx=stepOrderIndex(st);
+  const T=boardSnapshotState();
+  all.forEach(function(x,k){ if(k>=idx) setSlotOn(T,x,null); });
+  return T;
+}
+function computeRecsAt(st){
+  if(!st) return null;
+  const prevS=S, prevA=ACTIVE;
+  let rec=null;
+  try{ S=stateBeforeStep(st); ACTIVE=null; rec=computeRecs(); }
+  catch(e){ rec=null; }
+  S=prevS; ACTIVE=prevA;
+  return rec;
+}
+function isNarrow(){ return !!(window.matchMedia && window.matchMedia('(max-width:920px)').matches); }
 const pickIdxOf = (st)=> st.t==='pick' ? st.i : -1;
 function nextStep(){
   const all = steps();
@@ -3167,10 +3239,12 @@ function banMini(rows, side){
       + '<span>'+esc(h.name)+'</span>'+tag+'</div>';
   }).join('')+'</div>';
 }
-function banCardHTML(r, side){
+function banCardHTML(r, side, histCode){
   const h=H[r.code];
   const one = r.rank===1 ? ' one' : '';
-  const cls = 'bc'+one+(side==='opp'?' opp':'');
+  const hist = typeof histCode==='string';             // v4.11 : 복기 모드
+  const isSel = hist && histCode===r.code;
+  const cls = 'bc'+one+(side==='opp'?' opp':'')+(isSel?' sel':'');
   const main = side==='my'
     ? '<span class="sc">'+pc(r.est)+'%<small>밴 뒤 내 승률</small></span>'
     : '<span class="sc">'+pc(r.est)+'%<small>잘리면 내 승률</small></span>';
@@ -3185,9 +3259,13 @@ function banCardHTML(r, side){
   const thr = (r.threat||0)>=0.5
     ? ' · 위협 <b>+'+fmt(r.threat)+'</b>'
     : '';
-  const btn = side==='my'
-    ? '<button class="btn pri" data-apply="'+r.code+'">이 카드 밴</button>'
-    : '<button class="btn" data-apply="'+r.code+'">이 카드가 밴됨</button>';
+  const btn = hist
+    ? (isSel
+        ? '<span class="tg sel" style="flex:1;text-align:center;padding:4px 0">✅ 당시 선택</span>'
+        : '<button class="btn pri" data-histapply="'+r.code+'">이 카드로 교체</button>')
+    : (side==='my'
+      ? '<button class="btn pri" data-apply="'+r.code+'">이 카드 밴</button>'
+      : '<button class="btn" data-apply="'+r.code+'">이 카드가 밴됨</button>');
   return '<div class="'+cls+'" data-banrec="'+r.code+'" data-threat="'+fmt(r.threat||0)+'">'
     + '<div class="h"><span class="rk">'+r.rank+'</span>'
     +   '<span class="av"><span class="ini">'+esc(h.name.slice(0,1))+'</span><img src="'+IMG(h.code)+'" alt="" onerror="this.style.display=\'none\'">'+elIcon(h.el)+'</span>'
@@ -3255,6 +3333,7 @@ function slotHTML(kind, side, i, code, extraCls){
   const cls=['slot',kind,'s'+i];
   if(code) cls.push('filled'); else cls.push('empty');
   if(isActive) cls.push('active');
+  if(HISTVIEW && HISTVIEW.t===kind && HISTVIEW.s===side && (HISTVIEW.i||0)===i) cls.push('viewing');
   if(extraCls) cls.push(extraCls);
   let inner='';
   if(kind==='pre'){
@@ -3288,7 +3367,7 @@ function slotHTML(kind, side, i, code, extraCls){
              + '<span class="st">'+(guard?'<span class="gchip">🛡️ 밴가드</span>최종 밴 면제':'비어 있음')+'</span></span>';
     }
   }
-  const tip = code ? (' title="'+esc(H[code].name)+' · '+elName(H[code].el)+' '+esc(H[code].role||'')+' · '+statLine(H[code])+'"') : '';
+  const tip = code ? (' title="'+esc(H[code].name)+' · '+elName(H[code].el)+' '+esc(H[code].role||'')+' · '+statLine(H[code])+' · 클릭: 그 픽 당시 추천"') : '';
   return '<button class="'+cls.join(' ')+'"'+tip+' data-el="'+(code&&H[code]?H[code].el:'')+'" data-kind="'+kind+'" data-side="'+side+'" data-i="'+i+'" '+(code?'data-code="'+code+'"':'')+'>'+inner+'</button>';
 }
 
@@ -3619,7 +3698,11 @@ function pickIndexOfStep(st){
 function renderStrip(){
   const a=activeStep();
   let msg='';
-  if(!a){
+  if(HISTVIEW && slotGet(HISTVIEW)){
+    msg='📌 <b>'+slotLabel(HISTVIEW)+'</b> 당시 추천 보는 중'
+      + (a ? ' · 지금 차례 <b>'+slotLabel(a)+'</b>' : '')
+      + ' — <em>현재로 돌아가기</em>로 복귀';
+  } else if(!a){
     msg='밴픽이 끝났습니다 — <b>4:4</b> 조합을 확인하세요.';
   } else if(ACTIVE && slotGet(ACTIVE)){
     msg='<b>'+esc(H[slotGet(ACTIVE)].name)+'</b> 고치는 중 — 오른쪽에서 다른 영웅을 누르면 교체, <em>✕</em>는 삭제.';
@@ -3642,7 +3725,89 @@ function renderStrip(){
 }
 
 let RECS=null;
+function histReasonText(st){
+  if(!st) return '';
+  if(st.t==='pre') return (st.s==='my'?'내 ':'상대 ')+'프리밴 '+(st.i+1)+'번째 칸을 고를 때';
+  if(st.t==='pick') return (st.s==='my'?'내 ':'상대 ')+(st.i+1)+'픽'+(st.i===2?'(밴가드)':'')+' 차례';
+  return (st.s==='my'?'내 ':'상대 ')+'최종 밴 차례';
+}
+/* v4.11 : 복기 패널 — 그 차례의 추천 1~5순위 · 실제 선택 · 현재로 돌아가기 */
+function renderHist(){
+  const st=HISTVIEW;
+  if(!st) return false;
+  const code=slotGet(st);
+  if(!code) return false;
+  const label=slotLabel(st);
+  const bar=$('histBar');
+  const rec=computeRecsAt(st);
+  $('recTitle').textContent='📌 '+label+' 당시 추천';
+  $('recBadge').textContent='복기';
+  $('recBadge').className='badge hist';
+  ['dealerWarn','rmStrip','caseStrip'].forEach(function(id){ const el=$(id); if(el) el.style.display='none'; });
+  if(!rec){
+    if(bar){
+      bar.style.display='';
+      bar.innerHTML='<div class="hbTop"><b>📌 '+esc(label)+' 당시 추천</b></div>'
+        + '<div class="hbRow"><span class="hbNote">'+esc(histReasonText(st))+' 상태를 다시 계산하지 못했습니다.</span>'
+        + '<button class="btn pri" data-act="histexit">현재로 돌아가기</button></div>';
+    }
+    $('recCap').textContent='';
+    $('recList').innerHTML='<div class="sub" style="padding:12px">이 시점 추천을 계산할 수 없습니다.</div>';
+    $('recCount').textContent=''; $('recFoot').textContent='복기';
+    return true;
+  }
+  rec.hist=true; rec.histCode=code;
+  RECS=rec;
+  const chosen=H[code];
+  const rank=(rec.arr||[]).findIndex(function(r){ return r.code===code; })+1;
+  $('recCap').textContent='당시 보드 기준';
+  if(bar){
+    bar.style.display='';
+    bar.innerHTML='<div class="hbTop"><b>📌 '+esc(label)+' 당시 추천</b>'
+      + '<span class="hbSel">실제 선택 <b>'+esc(chosen.name)+'</b>'+(rank>0?' · 당시 '+rank+'순위':' · 추천 밖')+'</span></div>'
+      + '<div class="hbRow"><span class="hbNote">'+esc(histReasonText(st))+'의 추천을 보드에서 다시 계산했습니다. 카드의 <b>교체</b>를 누르면 이 칸이 바뀝니다.</span>'
+      + '<button class="btn pri" data-act="histexit">현재로 돌아가기</button>'
+      + '<button class="btn" data-act="histedit">✎ 이 자리 수정</button></div>';
+  }
+  if(rec.kind==='ban'){
+    const side=rec.step.s;
+    const rows=(rec.arr||[]).slice(0,4);
+    const head=(side==='my'?label+' 추천':'상대 최종 밴 예상')+' (당시 1~4순위)';
+    $('recList').innerHTML='<div class="banWrap">'
+      + '<div class="banSec'+(side==='opp'?' opp':'')+'"><h4>'+esc(head)+'</h4>'
+      + (rows.length?rows.map(function(r){ return banCardHTML(r, side, code); }).join('')
+          :'<div class="sub" style="padding:10px">당시 계산된 밴 후보가 없습니다.</div>')
+      + '</div>'
+      + '<div class="bhint">당시 보드 기준으로 다시 계산한 목록입니다. 실제 선택 <b>'+esc(chosen.name)+'</b>'
+      + (rank>0?' ('+rank+'순위)':'')+'<br>카드의 <b>교체</b>를 누르면 이 칸의 밴이 바뀝니다.</div>'
+      + '</div>';
+    $('recCount').textContent='';
+    $('recFoot').textContent='복기 · '+label;
+    return true;
+  }
+  const top=(rec.arr||[]).slice(0,10);
+  let listHtml = top.map(function(r,idx){ return recCard(r, idx, rec); }).join('')
+    || '<div class="sub" style="padding:12px">당시 계산된 추천이 없습니다.</div>';
+  /* 실제로 고른 영웅이 상위 10명 밖이면 맨 아래에 따로 붙여 '무엇을 골랐는지'까지 한 화면에 */
+  if(rank>top.length){
+    const selRec=(rec.arr||[]).find(function(r){ return r.code===code; });
+    if(selRec){
+      listHtml += '<div class="histSelLbl">— 실제 선택 (당시 '+rank+'순위) —</div>' + recCard(selRec, rank-1, rec);
+    }
+  }
+  $('recList').innerHTML = listHtml;
+  $('recCount').textContent = '상위 '+top.length+'명 / 후보 '+(rec.arr?rec.arr.length:0)+'명';
+  $('recFoot').textContent = '당시 보드로 재계산 · 1~5순위가 그때의 추천';
+  return true;
+}
 function renderRecs(){
+  /* v4.11 : 복기 모드면 그 차례의 추천을 그린다 */
+  if(HISTVIEW){
+    if(renderHist()) return;
+    HISTVIEW=null;
+  }
+  document.body.classList.remove('histmode');
+  const hbEl=$('histBar'); if(hbEl && hbEl.style.display!=='none'){ hbEl.style.display='none'; hbEl.innerHTML=''; }
   const rec = computeRecs();
   RECS=rec;
   if(rec.kind==='ban'){ renderBanPanel(rec); return; }
@@ -3691,7 +3856,9 @@ function recCard(r, idx, rec){
   const h=H[r.code];
   const opp = !!(rec && rec.opp);
   const who = '기록';
-  const cls = 'rc'+(idx===0?' top1':(idx<3?' top'+(idx+1):''))+(opp?' opp':'')+(r.danger?' danger':'');
+  const hist = !!(rec && rec.hist);                    // v4.11 : 그 차례의 추천을 복기 중
+  const isSel = !!(hist && rec.histCode===h.code);     // 그 픽에서 실제로 고른 영웅
+  const cls = 'rc'+(idx===0?' top1':(idx<3?' top'+(idx+1):''))+(opp?' opp':'')+(r.danger?' danger':'')+(isSel?' sel':'');
   const myTurn = !opp && rec && rec.kind==='pick';
   const isGuard = !!(myTurn && rec.step && rec.step.i===2);   // 3픽 = 밴가드 슬롯
   const why = r.why.slice(0,3).map(function(w){
@@ -3706,10 +3873,14 @@ function recCard(r, idx, rec){
     + (h.ban>0? '<span class="b"><i>밴</i>'+fmt(h.ban)+'%</span>':'')
     + '<span style="border-color:transparent;background:transparent;padding-left:0;color:#7f93b5">'+esc(h.role||jobName(h.job))+'</span>';
   const setLine = setChips(h.code, 2);
-  const acts = opp
-    ? '<div class="acts"><button class="btn pri" data-apply="'+h.code+'">'+who+'</button></div>'
-    : '<div class="acts"><button class="btn pri" data-apply="'+h.code+'">적용</button>'
-    + '<button class="btn no" data-miss="'+h.code+'" title="이 영웅은 내가 없음 — 추천에서 제외"><span class="lg">✕ 없는 영웅</span><span class="xs">✕</span></button></div>';
+  const acts = hist
+    ? (isSel
+        ? '<div class="acts"><span class="tg sel" style="flex:1;text-align:center;padding:4px 0">✅ 이 자리에 있던 픽</span></div>'
+        : '<div class="acts"><button class="btn pri" data-histapply="'+h.code+'">이 카드로 교체</button></div>')
+    : (opp
+      ? '<div class="acts"><button class="btn pri" data-apply="'+h.code+'">'+who+'</button></div>'
+      : '<div class="acts"><button class="btn pri" data-apply="'+h.code+'">적용</button>'
+      + '<button class="btn no" data-miss="'+h.code+'" title="이 영웅은 내가 없음 — 추천에서 제외"><span class="lg">✕ 없는 영웅</span><span class="xs">✕</span></button></div>');
   return '<div class="'+cls+'" data-rec="'+h.code+'" data-reccard="'+h.code+'">'
     + '<div class="r1">'
     +   '<div class="rank">'+(idx+1)+'</div>'
@@ -3721,6 +3892,7 @@ function recCard(r, idx, rec){
     + (setLine?'<div class="sets">'+setLine+'</div>':'')
     + (function(){
         const tg=[];
+        if(isSel) tg.push('<span class="tg sel">✅ 실제 선택</span>');
         if(isGuard) tg.push('<span class="tg pb guard">🛡️ 밴가드</span>');
         if(r.danger) tg.push('<span class="tg risk">⚠ 내 조합 카운터</span>');
         if(rec && rec.kind==='pre' && fitOn()){
@@ -4904,12 +5076,14 @@ function snapshot(){
   if(HIST.length>60) HIST.shift();
 }
 function undo(){
+  HISTVIEW=null;
   if(!HIST.length) return toast('되돌릴 단계가 없습니다');
   const st=JSON.parse(HIST.pop());
   S.myPre=st.myPre; S.oppPre=st.oppPre; S.my=st.my; S.opp=st.opp; S.myBan=st.myBan; S.oppBan=st.oppBan; S.first=st.first; S.noOppBan=!!st.noOppBan;
   ACTIVE=null; renderAll(); save();
 }
 function reset(){
+  HISTVIEW=null;
   snapshot();
   const miss=S.missing, first=S.first, owned=S.owned, ownMode=S.ownMode;
   S=fresh(); S.missing=miss; S.first=first; S.owned=owned; S.ownMode=ownMode;
@@ -4928,6 +5102,7 @@ function appliedToast(a, name){
   toast('✓ ['+slotLabel(a)+'] '+name+' 입력'+(nx?' → 다음: '+slotLabel(nx):' → 4:4 완료'));
 }
 function applyCode(code, silent){
+  if(HISTVIEW){ toast('복기 중입니다 — [현재로 돌아가기]를 누른 뒤 영웅을 고르세요'); return false; }
   const a=activeStep();
   if(!a){ toast('밴픽이 끝났습니다 — 초기화하거나 되돌리기를 눌러주세요'); return false; }
   const h=H[code];
@@ -4966,13 +5141,68 @@ function clearSlot(st){
   if(slotGet(st)){
     snapshot(); slotSet(st,null);
     if(st.t==='ban'){ if(st.s==='my') S.myBan=null; else S.oppBan=null; }
+    if(HISTVIEW && sameStep(HISTVIEW, st)) HISTVIEW=null;
     ACTIVE=null; renderAll(); save();
   }
 }
 function setActive(st){
+  HISTVIEW=null;                // v4.11 : 편집 모드로 들어가면 복기 화면은 닫는다
   ACTIVE=st;
   saveDraft();
   renderBoard(); renderRecs(); renderStrip(); renderGrid();
+}
+
+/* ---------------- v4.11 : 채워진 슬롯 클릭 = 당시 추천 복기 ---------------- */
+function openHist(st){
+  if(!st || !slotGet(st)) return false;
+  HISTVIEW={t:st.t, s:st.s, i:(st.i||0)};
+  ACTIVE=null;
+  document.body.classList.add('histmode');
+  renderAll();
+  const rl=$('recList'); if(rl) rl.scrollTop=0;
+  if(isNarrow()) setTab('rec');
+  return true;
+}
+function exitHist(toBoard){
+  if(!HISTVIEW) return;
+  HISTVIEW=null;
+  document.body.classList.remove('histmode');
+  const bar=$('histBar'); if(bar){ bar.style.display='none'; bar.innerHTML=''; }
+  renderAll();
+  if(toBoard && isNarrow()) setTab('board');
+}
+function slotOfCode(code, except){
+  if(!code) return null;
+  const all=steps();
+  for(let k=0;k<all.length;k++){
+    const st=all[k];
+    if(except && sameStep(st,except)) continue;
+    if(slotGet(st)===code) return st;
+  }
+  return null;
+}
+function histApply(code){
+  const st=HISTVIEW;
+  if(!st) return false;
+  if(!H[code]) return false;
+  const cur=slotGet(st);
+  if(code===cur){ toast('이미 이 자리에 있는 영웅입니다'); return false; }
+  const clash=slotOfCode(code, st);
+  if(clash){ toast(H[code].name+' — 이미 ['+slotLabel(clash)+']에 있습니다. 그 자리를 ✕로 비운 뒤 교체하세요'); return false; }
+  if(st.t==='ban'){
+    const idx=(st.s==='my'?S.opp:S.my).indexOf(code);
+    if(idx<0 || idx===2){ toast('최종 밴으로 쓸 수 없는 카드입니다'); return false; }
+  }
+  const label=slotLabel(st), before=cur?H[cur].name:'빈 칸';
+  snapshot();
+  slotSet(st, code);
+  HISTVIEW=null;
+  document.body.classList.remove('histmode');
+  const bar=$('histBar'); if(bar){ bar.style.display='none'; bar.innerHTML=''; }
+  save(); renderAll();
+  if(isNarrow()) setTab('board');
+  toast('✓ ['+label+'] '+before+' → '+H[code].name+' 교체 (되돌리기 가능)');
+  return true;
 }
 
 
@@ -5268,6 +5498,7 @@ function mobTurn(){
 /* v4.5.3 : 어느 탭에 있든 상단에 항상 보이는 현재 단계 배지 (내 턴=파랑 / 상대 턴=빨강 / 최종 밴=금) */
 function stageBadge(){
   const a=activeStep();
+  if(HISTVIEW && slotGet(HISTVIEW)) return {cls:'done', ic:'📌', txt:slotLabel(HISTVIEW)+' 복기 중', note:'현재로 돌아가기로 복귀'};
   if(!a) return {cls:'done', ic:'✅', txt:'밴픽 완료', note:'4:4 점검'};
   const me = a.s==='my';
   if(a.t==='pre') return {cls:me?'me':'op', ic:me?'🔵':'🔴',
@@ -5282,6 +5513,7 @@ function stageBadge(){
     txt:(me?'내 ':'상대 ')+'최종 밴 선택', note:me?'상대 4명 중 1명':'내 4명 중 1명'};
 }
 function stepNav(dir){
+  HISTVIEW=null;
   const all=steps().filter(function(st){ return !(st.t==='ban' && st.s==='opp' && S.noOppBan); });
   const cur=activeStep();
   let idx = cur ? all.findIndex(function(st){ return st.t===cur.t && st.s===cur.s && (st.i||0)===(cur.i||0); }) : -1;
@@ -5423,22 +5655,24 @@ document.addEventListener('click', function(ev){
     // 최종 밴 단계에서 상대 픽 클릭 → 밴
     const a=activeStep();
     const code=slot.dataset.code||null;
-    // 완료 상태에서도 채워진 슬롯을 클릭하면 그 자리를 바로 수정 모드로
-    if(!a && code && st.t!=='ban'){ setActive(st); toast('수정 모드 — 다른 영웅을 고르면 교체, 비우기로 삭제'); return; }
     if(a && a.t==='ban' && a.s==='my' && st.t==='pick' && st.s==='opp'){
       if(!code) return;
       if(st.i===2){ toast('3픽은 밴가드 — 최종 밴 불가'); return; }
       snapshot(); S.myBan=code; ACTIVE=null; save(); renderAll(); appliedToast({t:'ban',s:'my'}, H[code].name); return;
     }
-    // 완료 상태에서도 채워진 슬롯을 클릭하면 그 자리를 바로 수정 모드로
-    if(!a && code && st.t!=='ban'){ setActive(st); toast('수정 모드 — 다른 영웅을 고르면 교체, 비우기로 삭제'); return; }
     if(a && a.t==='ban' && a.s==='opp' && st.t==='pick' && st.s==='my' && code){
       snapshot(); S.oppBan=code; S.skipOppBan=false; ACTIVE=null; save(); renderAll(); appliedToast({t:'ban',s:'opp'}, H[code].name); return;
     }
+    /* v4.11 : 채워진 슬롯 본체 클릭 = 그 픽 차례의 '당시 추천' 복기.
+       영웅은 지우지 않는다 — 삭제는 오직 ✕(data-clear). */
+    if(code){ openHist(st); return; }
     if(st.t==='ban') return;
     setActive(st);
     return;
   }
+  /* v4.11 : 복기 패널의 [이 카드로 교체] */
+  const happ=t.closest('[data-histapply]');
+  if(happ){ histApply(happ.dataset.histapply); return; }
   const apply=t.closest('[data-apply]');
   if(apply){ applyCode(apply.dataset.apply); return; }
   const miss=t.closest('[data-miss]');
@@ -5451,10 +5685,21 @@ document.addEventListener('click', function(ev){
   const hero=t.closest('[data-hero]');
   if(hero){ applyCode(hero.dataset.hero); return; }
   const act=t.closest('[data-act]');
-  if(act){ if(act.dataset.act==='reset') reset(); if(act.dataset.act==='undo') undo(); if(act.dataset.act==='finish'){ snapshot(); S.noOppBan=true; ACTIVE=null; save(); renderAll(); toast('상대 최종 밴 기록 없이 마쳤습니다'); } return; }
+  if(act){
+    const k=act.dataset.act;
+    if(k==='histexit'){ exitHist(true); return; }
+    if(k==='histedit'){ if(HISTVIEW){ const hp={t:HISTVIEW.t,s:HISTVIEW.s,i:HISTVIEW.i}; exitHist(false); setActive(hp); } return; }
+    if(k==='reset') reset();
+    if(k==='undo') undo();
+    if(k==='finish'){ snapshot(); S.noOppBan=true; ACTIVE=null; save(); renderAll(); toast('상대 최종 밴 기록 없이 마쳤습니다'); }
+    return;
+  }
   /* v4.5.3 : 분할 화면(초압축)에서는 카드 전체를 누르면 바로 적용 */
   const rcard=t.closest('[data-reccard]');
-  if(rcard && COMPACT){ applyCode(rcard.dataset.reccard); return; }
+  if(rcard && COMPACT){
+    if(HISTVIEW){ toast('복기 중 — 카드의 [이 카드로 교체]를 눌러야 이 칸이 바뀝니다'); return; }
+    applyCode(rcard.dataset.reccard); return;
+  }
   /* v4.5.3 : 단계 배지의 이전/다음 칸 이동 */
   const mnav=t.closest('.mbArrow');
   if(mnav){ if(mnav.id==='mbPrev') stepNav(-1); else stepNav(1); return; }
@@ -5580,12 +5825,13 @@ document.addEventListener('keydown', function(e){
   const typing = /^(INPUT|TEXTAREA)$/.test((document.activeElement||{}).tagName||'');
   if(e.key==='Escape'){
     ['infoOv','ownOv','metaOv'].forEach(id=>$(id).classList.remove('show'));
+    if(HISTVIEW){ exitHist(false); toast('복기를 닫았습니다'); return; }
     if(ACTIVE){ ACTIVE=null; renderBoard(); renderRecs(); renderStrip(); renderGrid(); toast('슬롯 수정을 취소했습니다'); }
     return;
   }
   if(e.key==='/' && !typing){ e.preventDefault(); $('q').focus(); $('q').select(); return; }
   if((e.ctrlKey||e.metaKey) && e.key==='z'){ e.preventDefault(); undo(); return; }
-  if(e.key==='Enter' && !typing && !ACTIVE){ const r=RECS&&RECS.arr&&RECS.arr[0]; if(r) applyCode(r.code); return; }
+  if(e.key==='Enter' && !typing && !ACTIVE && !HISTVIEW){ const r=RECS&&RECS.arr&&RECS.arr[0]; if(r) applyCode(r.code); return; }
 });
 
 /* ---------------- v4.3 : 내 전적 맞춤 이벤트 ---------------- */
@@ -5615,7 +5861,9 @@ window.__app = {get S(){return S;}, get recs(){return RECS;}, H:H, LIST:LIST, ge
     scorePreban:scorePreban, scoreOppPre:scoreOppPre, preSplitFor:preSplitFor, preBanPct:preBanPct, prePairN:prePairN, recentPickPct:recentPickPct, recentWin:recentWin, recentBanPct:recentBanPct,
     scoreBan:scoreBan, banThreat:banThreat, banToRec:banToRec, tagEdges:tagEdges, muWR:muWR, banTargets:banTargets, roleOf:roleOf, get EXTRA(){return EXTRA;},
     pStat:pStat, get FIT(){return FIT;}, setFit:function(v){ FIT.on=!!v; try{localStorage.setItem('e7rta.fit', FIT.on?'1':'0');}catch(e){} renderFit(); renderAll(); },
-    playerBadge:playerBadge, deckThreat:deckThreat, fireOf:fireOf, fireStatus:fireStatus, fireCount:fireCount, aceInfo:aceInfo, myCore:myCore, scorePick:scorePick, caseDraft:caseDraft, get MDB(){return MDB;}, get player(){return playerStats;}, get SKP(){return SKP;}, skHas:skHas, skSkill:skSkill, skSkillLabel:skSkillLabel, elDiff:elDiff, skillClash:skillClash, elementClash:elementClash, targetRank:targetRank, skPassive:skPassive, skF:skF, targetReason:targetReason, turnPlan:turnPlan, get fitOn(){return fitOn();}, roleModel:roleModel, rmCombo:rmCombo, rmTriple:rmTriple, rmPrebanN:rmPrebanN, rmModels:rmModels, DEFAULT_UNOWNED:DEFAULT_UNOWNED, applyDefaultUnowned:applyDefaultUnowned, get missing(){return S.missing;}, patch:patOf, get PATD(){return PATD;}, setTab:setTab, get tab(){return TAB;}, teamEstimate:teamEstimate, renderMobCheck:renderMobCheck, renderMobBar:renderMobBar, mobTurn:mobTurn};
+    playerBadge:playerBadge, deckThreat:deckThreat, fireOf:fireOf, fireStatus:fireStatus, fireCount:fireCount, aceInfo:aceInfo, myCore:myCore, scorePick:scorePick, caseDraft:caseDraft, get MDB(){return MDB;}, get player(){return playerStats;}, get SKP(){return SKP;}, skHas:skHas, skSkill:skSkill, skSkillLabel:skSkillLabel, elDiff:elDiff, skillClash:skillClash, elementClash:elementClash, targetRank:targetRank, skPassive:skPassive, skF:skF, targetReason:targetReason, turnPlan:turnPlan, get fitOn(){return fitOn();}, roleModel:roleModel, rmCombo:rmCombo, rmTriple:rmTriple, rmPrebanN:rmPrebanN, rmModels:rmModels, DEFAULT_UNOWNED:DEFAULT_UNOWNED, applyDefaultUnowned:applyDefaultUnowned, get missing(){return S.missing;}, patch:patOf, get PATD(){return PATD;}, setTab:setTab, get tab(){return TAB;}, teamEstimate:teamEstimate, renderMobCheck:renderMobCheck, renderMobBar:renderMobBar, mobTurn:mobTurn,
+    openHist:openHist, exitHist:exitHist, histApply:histApply, histRecs:computeRecsAt, renderHist:renderHist, stateBeforeStep:stateBeforeStep,
+    get histView(){return HISTVIEW;}};
 })();
 </script>
 </body>
