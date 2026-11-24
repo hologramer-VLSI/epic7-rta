@@ -8024,7 +8024,7 @@ function v54NotosPick(code, mine, foe){
       const supN = roles.filter(function(r){ return r === '탱' || r === '힐'; }).length;
       const fireN = roles.filter(function(r){ return r === '딜러'; }).length;
       if(notosFireOk() && fireN <= 1 && supN >= 2){
-        v += (fireN === 0 ? 10.0 : 5.0);
+        v += (fireN === 0 ? 12.0 : 6.0);
         t = '<b>최대 생명력 비례 딜러</b> — 투신 중 2스는 방어 50% 관통. 탱으로만 세면 안 되는 화력 카드입니다'+evTx;
       }
     }catch(e){}
