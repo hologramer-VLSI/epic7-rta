@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#070a12">
-<title>에픽세븐 실레나 밴픽 v5.4 · VLSI 전적 맞춤</title>
+<title>에픽세븐 실레나 밴픽 v5.5 · VLSI 전적 맞춤</title>
 <style>
 :root{
   --bg:#070a12; --bg2:#0b1020; --panel:#0f1729; --panel2:#131f36;
@@ -1250,6 +1250,15 @@ button{font-family:inherit}
   .pbTurn .toChip{font-size:8px;max-width:72px}
 }
 
+/* ===== v5.5 : 상대 대응 루트 · 다음 픽 선점 · 최종 밴 내성 ===== */
+.v55Note{padding:3px 8px 4px;font-size:9.5px;font-weight:800;color:#9fe6ff;background:rgba(80,180,255,.08);border-bottom:1px dashed rgba(110,200,255,.45);line-height:1.32}
+.v55Note b{color:#dcf6ff}
+.v55up{font-style:normal;font-size:7px;font-weight:900;color:#8ef0a8;border:1px solid rgba(120,255,170,.45);border-radius:4px;padding:0 1px;margin-left:2px;flex:0 0 auto}
+.v55dn{font-style:normal;font-size:7px;font-weight:900;color:#ff9d9d;border:1px solid rgba(255,120,120,.5);border-radius:4px;padding:0 1px;margin-left:2px;flex:0 0 auto}
+.anRow.v55ban .pb.warn{color:#ffb46b}
+.anRow.v55ban .ok{color:#8ef0a8}
+@media (max-width:920px){.v55Note{font-size:9px;padding:2px 6px 3px}}
+
 </style>
 </head>
 <body data-tab="board">
@@ -1258,7 +1267,7 @@ button{font-family:inherit}
   <div class="top">
     <div class="brand">
       <div class="mark">⚔️</div>
-      <div><b>에픽세븐 실레나 밴픽<span class="vtag">v5.4</span></b><span id="subTitle">VLSI 맞춤 · 최신 실전</span></div>
+      <div><b>에픽세븐 실레나 밴픽<span class="vtag">v5.5</span></b><span id="subTitle">VLSI 맞춤 · 최신 실전</span></div>
     </div>
     <div class="spacer"></div>
     <span class="chip data" id="dataChip" title="실제 전적검색 전투 기록">🏆 실전 <b>—</b></span><span class="chip" id="seasonChip">2026 폴 · ss21</span>
@@ -4376,7 +4385,6 @@ function renderRecs(){
     $('recList').innerHTML = compareHTML(rec);
     $('recCount').textContent = '3갈래 × 각 4장';
     $('recFoot').textContent = '카드의 [적용]·[✕]로 바로 픽 — 3갈래 비교 중';
-    $('modeBar').scrollIntoView ? null : null;
     return;
   }
   if(rec.kind==='done'){
@@ -8266,6 +8274,692 @@ function v54NoteHTML(){
   };
 })();
 
+/* ════════════════════════════════════════════════════════════════════
+   v5.5 : 상대 대응 루트(1~3픽 분화) · 상대 다음 픽 선점 · 최종 밴 내성(4인 성립 검사)
+   ────────────────────────────────────────────────────────────────────
+   사용자 지적(2026-11-25, 전투 #92383500 · #92386533 두 판 연속 패배)
+     "이거 보면 네가 추천해준대로 하면 상대가 이렇게 골라버려… 개선해봐"
+
+   ① 1~3픽이 마피네·메이린·어목디 같은 느린 받아치기로 고정되던 문제
+      상대 1~3픽에서 신호를 뽑아 '루트'를 정하고, 그 루트의 카드만 위로 올린다.
+        신호: 속도·선턴(최속·오프너·난입) / 강화해제(strip) / 약화해제(cleanse)
+              최대 생명력 비례(hp) / 보호막·분배 / 지속피해(dot) / 제어 / 상처 / 눕덱
+        루트: 속도 경합(오프너·난입) · 정화 무관 축(소멸·고유효과·성역) · 상처 · 관통
+      같은 축을 3장째 쌓는 픽(느린 제어·화력만)은 감점한다.
+   ② 상대 다음 픽 예측 + 선점 가산
+      내 픽 뒤에 남은 '상대 픽'을 scoreOppPick 으로 예측해 확률을 만들고,
+      그 카드가 내 덱에 치명적이면 '상대 픽 선점' 가산과 근거를 띄운다.
+      특히 노토스(c2181) — 지금 안 잡으면 상대 4~5픽에 가고 내 최종 밴 카드가 강제 소모된다.
+   ③ 최종 밴 내성 — 4인 실전 성립 검사
+      4~5픽에서 내 5명 중 상대가 가장 까다로운 1명(3픽 밴가드는 제외)을 밴한다고 가정하고,
+      남은 4명 vs 상대 예상 4명의 예상 승률(setEstimate + 모의 결투 아키타입)을 최악값으로 잰다.
+      밴 1장에 딜러·속도·케어가 0이 되는 '외다리'는 감점, 2축 이상 유지 픽은 가산.
+   ④ ① 기존 v4.13(legacy) 순위·점수는 그대로 둔다(v4.13 백업과 100% 동일). 표식만 붙인다.
+   ════════════════════════════════════════════════════════════════════ */
+const V55 = {L2S: 2.6, VER: '5.5'};
+
+function v55n(c){ return (H[c] && (H[c].name || H[c].n)) || c; }
+function v55L(c){
+  const s = {};
+  for(let i=1;i<=3;i++){ try{ slotK(c,i).forEach(function(l){ s[l]=1; }); }catch(e){} }
+  return s;
+}
+function v55has(c, list){ const L = v55L(c); for(let i=0;i<list.length;i++){ if(L[list[i]]) return list[i]; } return ''; }
+function v55m(c){ try{ return mrOf(c) || {}; }catch(e){ return {}; } }
+function v55spd(c){ try{ return spdOf(c).med || 200; }catch(e){ return 200; } }
+function v55cut(c){ try{ return cutinLv(c) || 0; }catch(e){ return 0; } }
+function v55op(c){ try{ return isOpenerCard(c); }catch(e){ return false; } }
+function v55dd(c){ try{ return isDD(c); }catch(e){ return false; } }
+function v55care(c){ try{ return isCareCard(H[c]); }catch(e){ return false; } }
+function v55hold(c){ try{ return isHoldCard(c); }catch(e){ return false; } }
+function v55fire(c){ try{ return !!fireOf(H[c]); }catch(e){ return false; } }
+function v55role(c){ try{ return roleOf(H[c]); }catch(e){ return '딜러'; } }
+function v55hpScale(c){
+  const m = v55m(c), sc = m.scale || {};
+  return Object.keys(sc).some(function(k){ return sc[k] === 'hp'; });
+}
+const V55_DEB = ['기절', '수면', '침묵', '봉인', '속박', '도발', '쿨밀기', '행게감소', '회복불가'];
+const V55_BUF = ['공격력증가', '방어증가', '보호막', '면역', '행게증가', '회복', '무적', '반격', '속도증가'];
+const V55_ATK_DEB = ['기절', '수면', '침묵', '봉인', '속박', '도발', '쿨밀기'];
+
+/* ── 상대 1~3픽 신호 ─────────────────────────────────────────────── */
+function v55FoeSig(foe){
+  const s = {n: 0, speed: [], strip: [], cleanse: [], hpscale: [], barrier: [], dot: [],
+             ctrl: [], injury: [], stall: [], pasv: [], topSpd: 0, topC: null,
+             fastestName: '', fastestCode: null};
+  (foe || []).forEach(function(c){
+    if(!H[c]) return;
+    const m = v55m(c), L = v55L(c), sp = v55spd(c);
+    s.n++;
+    if(sp > s.topSpd){ s.topSpd = sp; s.topC = c; s.fastestCode = c; s.fastestName = v55n(c); }
+    if(v55op(c) || sp >= 258 || v55cut(c) >= 2) s.speed.push(c);
+    if(m.strip || L['강화해제']) s.strip.push(c);
+    if(m.cleanse || L['약화해제']) s.cleanse.push(c);
+    if(v55hpScale(c)) s.hpscale.push(c);
+    if(m.barrier || m.share || L['보호막'] || L['피해분배']) s.barrier.push(c);
+    if(m.dot || L['지속피해'] || m.venom) s.dot.push(c);
+    if(v55has(c, V55_ATK_DEB)) s.ctrl.push(c);
+    if(m.injury) s.injury.push(c);
+    if(v55role(c) === '탱' || v55role(c) === '힐') s.stall.push(c);
+    if(m.counter || m.extra_attack || m.dual) s.pasv.push(c);
+  });
+  return s;
+}
+/* ── 내 조합 신호 ───────────────────────────────────────────────── */
+function v55MineSig(mine){
+  const s = {n: 0, speed: [], fire: [], care: [], ctrl: [], slow: [], injury: [], dd: [], tank: []};
+  (mine || []).forEach(function(c){
+    if(!H[c]) return;
+    const sp = v55spd(c);
+    s.n++;
+    if(v55op(c) || v55cut(c) >= 2) s.speed.push(c);
+    if(v55fire(c)) s.fire.push(c);
+    if(v55care(c)) s.care.push(c);
+    if(v55has(c, V55_ATK_DEB)) s.ctrl.push(c);
+    if(!v55op(c) && v55cut(c) < 2 && sp < 240) s.slow.push(c);
+    if(v55m(c).injury) s.injury.push(c);
+    if(v55dd(c)) s.dd.push(c);
+    if(v55role(c) === '탱' || v55role(c) === '힐') s.tank.push(c);
+  });
+  return s;
+}
+
+/* ── 루트 결정 — 상대 신호의 강도 순위 ──────────────────────────── */
+function v55Route(mine, foe){
+  const f = v55FoeSig(foe), m = v55MineSig(mine);
+  const w = {
+    speed:   (f.speed.length ? 1.2 : 0) + (f.topSpd >= 265 ? 0.9 : 0) + (f.fastestCode && v55op(f.fastestCode) ? 0.4 : 0),
+    strip:   1.15 * f.strip.length,
+    cleanse: 0.85 * Math.min(3, f.cleanse.length),
+    hpscale: 0.80 * Math.min(3, f.hpscale.length),
+    dot:     0.80 * Math.min(2, f.dot.length),
+    ctrl:    0.75 * Math.min(3, f.ctrl.length),
+    injury:  1.05 * f.injury.length,
+    barrier: 0.50 * Math.min(3, f.barrier.length),
+    stall:   0.55 * Math.min(3, f.stall.length)
+  };
+  const keys = Object.keys(w).filter(function(k){ return w[k] >= 0.6; })
+    .sort(function(a, b){ return w[b] - w[a]; });
+  const key = keys[0] || 'balance';
+  const LAB = {speed: '속도·선턴', strip: '강화해제', cleanse: '약화해제(정화)', hpscale: '최대 생명력 비례',
+               dot: '지속피해', ctrl: '제어', injury: '상처', barrier: '보호막·분배', stall: '눕덱', balance: '균형'};
+  return {key: key, keys: keys, sig: f, mine: m, w: w, label: LAB[key] || '균형',
+          label2: keys.slice(0, 2).map(function(k){ return LAB[k]; }).join(' · ')};
+}
+
+/* ── 루트별 가감점 (레거시 원점수 단위) ─────────────────────────── */
+function v55RouteTerms(code, mine, foe){
+  if(!foe || !foe.length || !H[code]) return null;
+  const R = v55Route(mine, foe), f = R.sig, m = R.mine;
+  let v = 0; const hits = [];
+  const wt = function(k){ return (R.key === k) ? 1 : (R.keys.indexOf(k) === 1 ? 0.7 : 0.35); };
+  const add = function(k, val, t, warn){
+    if(!val) return;
+    const f2 = wt(k);
+    v += val * f2;
+    hits.push({k: k, v: val * f2, raw: val, t: t, warn: warn ? 1 : 0});
+  };
+  const sp = v55spd(code), foeTop = f.topSpd || 0;
+  const slowTag = !v55op(code) && v55cut(code) < 2 && sp < foeTop - 25;
+  const L = v55L(code), M = v55m(code);
+
+  /* ① 속도·선턴 — 더 빠른 오프너 / 행게 난입 / 선제 제어 / (아니면) 느린 받아치기 감점 */
+  if(f.speed.length && foeTop >= 245){
+    if(v55op(code) && sp >= foeTop - 10){
+      add('speed', 7.5, '속도 경합 — <b>선턴 오프너</b> '+sp+'로 상대 최속 <b>'+esc(f.fastestName)+' '+foeTop+'</b>보다 먼저 1턴 확보');
+    } else if(v55cut(code) >= 2 && sp >= foeTop - 30){
+      add('speed', 5.0, '상대 최속 '+foeTop+' — <b>전투 시작 행게·피격 행게(난입)</b>로 상대 연속 턴 사이를 끊는 카드');
+    } else if(v55has(code, ['침묵', '봉인', '기절', '행게감소', '쿨밀기']) && sp >= foeTop - 30){
+      add('speed', 3.2, '선제 <b>'+v55has(code, ['침묵', '봉인', '기절', '행게감소', '쿨밀기'])+'</b> — 상대 선턴을 출발 전에 잠그는 카드');
+    } else if(slowTag && m.speed.length === 0){
+      add('speed', -3.8 - 1.2 * Math.min(2, m.slow.length), '⛔ 느린 받아치기 — 상대 선턴 압박(최속 '+foeTop+
+        ')에 1턴을 내주고, 이미 느린 카드 <b>'+(m.slow.length + 1)+'장</b>째라 회복 전에 정리됩니다', 1);
+    } else if(v55dd(code) && sp < foeTop - 30 && m.speed.length === 0){
+      add('speed', -2.6, '⛔ 느린 화력('+sp+') — 상대가 먼저 3연속 턴을 잡으면 1턴 전에 잘립니다', 1);
+    }
+    if(m.speed.length >= 1 && slowTag){
+      add('speed', 1.5, '속도 축(<b>'+esc(v55n(m.speed[0]))+'</b>)이 이미 있어 받아내기가 성립합니다');
+    }
+  }
+  /* ② 강화해제(strip) — 성역 / 버프 무관 생존 / 버프 의존 감점 */
+  if(f.strip.length){
+    if(M.buff_immune){
+      add('strip', 6.5, '상대 <b>강화해제 '+f.strip.length+'명</b>(' + esc(v55n(f.strip[0])) + ') — 3스 <b>투쟁의 성역</b>은 버프를 아예 못 붙게 해 해제 가치를 0으로 만듭니다');
+    } else if(M.immortal || M.no_crit || M.dmg_reduce || v55hpScale(code)){
+      add('strip', 2.0, '버프에 기대지 않는 생존 축 — 상대 강화해제로 꺼지지 않습니다');
+    }
+    if(v55has(code, V55_BUF) && !M.buff_immune){
+      add('strip', -3.0, '⛔ <b>'+v55has(code, V55_BUF)+'</b> 의존 — 상대 <b>강화해제</b>('+esc(v55n(f.strip[0]))+')에 먼저 벗겨집니다', 1);
+    }
+  }
+  /* ③ 약화해제(cleanse) — 내 디버프가 씻긴다 / 안 씻기는 축 가산 */
+  if(f.cleanse.length){
+    const deb = v55has(code, V55_DEB);
+    if(deb){
+      add('cleanse', -3.6, '⛔ 상대 <b>약화해제</b> '+f.cleanse.length+'명('+esc(v55n(f.cleanse[0]))+') — 내 <b>'+deb+'</b>이 매 턴 씻깁니다', 1);
+    }
+    if(M.omen || M.extinct || M.fixed || M.fixed_damage || M.strip || M.injury){
+      const nm = M.omen ? '징조(고유효과)' : (M.extinct ? '소멸' : (M.injury ? '상처' : (M.strip ? '강화해제' : '고정피해')));
+      add('cleanse', 2.6, '상대 정화로 안 지워지는 <b>'+nm+'</b> 축');
+    }
+  }
+  /* ④ 최대 생명력 비례(hp) — 상처로 깎는다 */
+  if(f.hpscale.length){
+    if(M.injury){
+      add('hpscale', 4.2, '상처 — 상대 <b>최대 생명력 비례</b> '+f.hpscale.length+'명('+esc(v55n(f.hpscale[0]))+')의 피해·보호막·회복을 함께 깎습니다');
+    } else if(v55hpScale(code) && !f.injury.length){
+      add('hpscale', -1.4, '내 피해도 최대 생명력 비례 — 상대가 상처를 들고 오면 같이 꺾입니다', 1);
+    }
+  }
+  /* ⑤ 지속피해(dot) — 약화해제·면역으로 씻는 카드 */
+  if(f.dot.length){
+    if(v55has(code, ['약화해제', '면역'])){
+      add('dot', 2.6, '상대 <b>지속피해</b>('+esc(v55n(f.dot[0]))+')를 <b>'+v55has(code, ['약화해제', '면역'])+'</b>로 지우는 카드');
+    }
+  }
+  /* ⑥ 보호막·분배 — 관통·강화해제 */
+  if(f.barrier.length){
+    if(v55has(code, ['관통', '강화해제']) || M.pierce){
+      add('barrier', 2.2, '상대 <b>보호막·분배</b> '+f.barrier.length+'명 — <b>'+(v55has(code, ['관통', '강화해제']) || '관통')+'</b>으로 방어를 통과');
+    }
+  }
+  /* ⑦ 제어 — 면역·해제 */
+  if(f.ctrl.length){
+    if(v55has(code, ['면역', '해제', '약화해제'])){
+      add('ctrl', 2.4, '상대 제어 '+f.ctrl.length+'명 — <b>'+v55has(code, ['면역', '해제', '약화해제'])+'</b>으로 기절·봉인을 씻는 카드');
+    } else if(v55dd(code) && !M.immortal && !M.no_crit){
+      add('ctrl', -1.6, '상대 제어에 그대로 묶이는 화력 — 선제 제어·면역이 먼저입니다', 1);
+    }
+  }
+  /* ⑧ 상대 상처 — 최대 생명력 비례 딜러 감점 / 시간 역행 가산 */
+  if(f.injury.length){
+    if(M.time_reversal){
+      add('injury', 5.0, '상대 <b>상처</b>를 <b>시간 역행</b>으로 되돌리는 카드');
+    } else if(v55hpScale(code)){
+      add('injury', -2.2, '⛔ 상대 <b>상처</b>('+esc(v55n(f.injury[0]))+') — 최대 생명력이 깎여 내 비례 피해도 급감합니다', 1);
+    }
+  }
+
+  /* ⑨ 패턴 탈피 — 같은 축 3장째 감점(고정 1~3픽 방지) */
+  if(m.n >= 2){
+    if(slowTag && m.slow.length >= 2 && !f.speed.length){
+      add('speed', -2.2, '⛔ 느린 카드 <b>'+m.slow.length+'장</b>째 — 상대를 받아치기만 하면 밴 1장에 무너지는 외다리가 됩니다', 1);
+    }
+    if(v55dd(code) && m.dd.length >= 2 && !v55has(code, V55_ATK_DEB) && !v55op(code)){
+      add('cleanse', -1.8, '화력 <b>'+(m.dd.length + 1)+'장</b>째 — 선턴·제어 없이 딜러만 쌓으면 턴을 못 잡습니다', 1);
+    }
+  }
+  /* ⑩ v5.4 프리렌 보정 — 광역·추가타 소스가 있으면 '단일 화력' 가산을 되돌린다 */
+  if(code === 'c1172'){
+    let press = 0;
+    try{ press = foeHitPressure(foe).p; }catch(e){}
+    if(press >= 1.5 && press < 4.3){
+      /* v5.4 는 압박 4.3 미만을 '단일 화력 위주'로 보고 +4.5 를 줬다 — 추가타·광역이 있으면
+         실제 피격은 2회 이상이라 소울 4가 두 배 속도로 마른다. 그 가산을 되돌린다. */
+      v += -5.2; hits.push({k: 'frieren', v: -5.2, raw: -5.2,
+        t: '⛔ 상대에 광역·추가타 소스가 있어 실제 피격은 2회 이상 — 프리렌 소울 4가 두 배로 마릅니다(압박 '+press.toFixed(1)+')', warn: 1});
+    }
+  }
+  if(!hits.length) return null;
+  hits.sort(function(a, b){ return Math.abs(b.v) - Math.abs(a.v); });
+  return {v: v, hits: hits, t: hits[0].t, warn: hits[0].warn ? 1 : 0, route: R};
+}
+
+/* ── 상대 다음 픽 예측 ──────────────────────────────────────────── */
+let V55CACHE = {key: '', pred: null};
+function v55NextOppStep(step){
+  if(!step || step.t !== 'pick' || step.s !== 'my') return null;
+  let all;
+  try{ all = steps(); }catch(e){ return null; }
+  let k = -1;
+  for(let i=0;i<all.length;i++){
+    if(all[i].t === step.t && all[i].s === step.s && (all[i].i || 0) === (step.i || 0)){ k = i; break; }
+  }
+  if(k < 0) return null;
+  for(let j=k+1;j<all.length;j++){
+    const st = all[j];
+    if(st.t !== 'pick') continue;
+    if(st.s === 'opp' && !slotGet(st)) return st;
+  }
+  return null;
+}
+function v55CacheKey(step){
+  return [step.s, step.i, S.first, (S.my || []).join(''), (S.opp || []).join(''),
+          (S.myPre || []).join(''), (S.oppPre || []).join(''), S.myBan || '', S.oppBan || ''].join('|');
+}
+function v55Pred(step){
+  const key = v55CacheKey(step);
+  if(V55CACHE.key === key && V55CACHE.pred) return V55CACHE.pred;
+  const ns = v55NextOppStep(step);
+  const out = {step: ns, arr: [], p: {}, top: [], own: 0};
+  if(ns){
+    let cands = [];
+    try{ cands = candidates({step: ns, ignoreMissing: true}); }catch(e){ cands = []; }
+    const arr = [];
+    cands.forEach(function(h){
+      try{ const r = scoreOppPick(h.code, ns); if(r && isFinite(r.sc)) arr.push(r); }catch(e){}
+    });
+    arr.sort(function(a, b){ return b.sc - a.sc; });
+    if(arr.length){
+      const mx = arr[0].sc, T = 6.0;
+      let sum = 0; const ex = [];
+      arr.forEach(function(r){ const e = Math.exp((r.sc - mx) / T); ex.push(e); sum += e; });
+      arr.forEach(function(r, i){ out.p[r.code] = ex[i] / Math.max(1e-9, sum); });
+      out.arr = arr; out.top = arr.slice(0, 6);
+    }
+    out.own = (S.opp || []).filter(Boolean).length;
+  }
+  V55CACHE = {key: key, pred: out};
+  return out;
+}
+
+/* 이 카드가 상대에게 갔을 때 내 덱에 얼마나 치명적인가 (0~2) */
+function v55Threat(code, mine){
+  let t = 0, txt = '';
+  (mine || []).forEach(function(c){
+    if(!H[c] || c === code) return;
+    let q = null;
+    try{ q = muWR(code, c); }catch(e){}
+    if(q && q.n >= 25 && q.wr >= 56){
+      t += Math.min(0.9, (q.wr - 54) / 12);
+      if(!txt) txt = '내 '+v55n(c)+' 상대 '+pc(q.wr)+'%';
+    }
+    try{
+      const te = tagEdges(H[code], H[c]);
+      if(te && te.v > 1.2){ t += 0.35; if(!txt) txt = '내 '+v55n(c)+'의 '+te.msgs[0].def+' 무력화'; }
+    }catch(e){}
+  });
+  const m = v55m(code);
+  if(m.buff_immune && (mine || []).some(function(c){ return v55has(c, V55_BUF); })) t += 0.4;
+  if((m.soul_block || m.resource_reduction) && (mine || []).some(function(c){ return v55m(c).soul_shield || v55L(c)['불사']; })) t += 0.4;
+  if((m.strip) && (mine || []).some(function(c){ return v55has(c, V55_BUF); })) t += 0.3;
+  return {v: Math.min(2, t), t: txt};
+}
+
+function v55Preempt(code, mine, foe, step){
+  if(!step || step.t !== 'pick' || step.s !== 'my' || !foe || !foe.length) return null;
+  const pr = v55Pred(step);
+  if(!pr.step) return null;
+  const p = pr.p[code] || 0;
+  const rank = pr.arr.findIndex ? pr.arr.findIndex(function(r){ return r.code === code; }) + 1 : 0;
+  const th = v55Threat(code, mine);
+  const h = H[code];
+  let op = false;
+  try{
+    op = (preBanPct(h, preSplitFor('my')) >= 15) || (recentPickPct(h) >= 10);
+  }catch(e){}
+  /* op 카드(노토스·프리밴 상위)는 모델 확률이 낮아도 "아직 살아 있음" 자체가 신호다 */
+  if(p < 0.035 && !op) return null;
+  /* 상대 픽 모델(scoreOppPick)은 392명을 같은 잣대로 줄 세운 근사라 확률을 그대로 쓰지 않는다:
+     상한 35%로 눌러 과신을 막고, '아직 살아 있는 OP 카드'는 모델과 별개로 따로 가산한다. */
+  const pcv = Math.min(0.35, p);
+  let v = 0;
+  let kind = 'model';
+  if(pcv >= 0.10){
+    v += Math.min(5.0, 13 * pcv);
+    if(th.v >= 0.9) v += 1.8; else if(th.v >= 0.4) v += 0.8;
+  }
+  if(op){
+    /* 모델이 낮게 잡아도(=아직 상대가 안 가져간 최상위 카드) 노토스처럼 남아 있으면 선점 가치가 크다 */
+    const b = 3.6 * Math.min(1, 0.45 + p / 0.12);
+    if(b > v){ v = b; kind = 'op'; }
+    else v += b * 0.45;
+  }
+  v = Math.min(8.0, v);
+  if(v < 1.2) return null;
+  const whyTxt = th.t ? ' · 내 덱에 치명(' + th.t + ')' : '';
+  let t;
+  if(code === 'c2181'){
+    t = '<b>상대 픽 선점 — 노토스 뺏김 방지</b>: 상대 다음 픽 예상 <b>'+pc(p*100)+'%</b>'
+      + (rank ? ' ('+rank+'순위)' : '') + '. 지금 안 잡으면 상대 4~5픽에 가고 내 최종 밴 카드가 강제 소모됩니다' + whyTxt;
+  } else if(kind === 'op'){
+    t = '<b>상대 픽 선점</b> — 최근 픽·프리밴 상위인데 아직 살아 있습니다. 상대가 다음 픽(예상 '+pc(p*100)+'%)에서 가져가면 내 밴 카드를 씁니다' + whyTxt;
+  } else {
+    t = '<b>상대 픽 선점</b> — 상대 다음 픽 예상 <b>'+pc(p*100)+'%</b>' + (rank ? ' ('+rank+'순위)' : '')
+      + '. 남겨 두면 상대가 가져가 내 밴 카드를 씁니다' + whyTxt;
+  }
+  return {v: v, t: t, p: p, rank: rank, warn: 0, preempt: 1, kind: kind};
+}
+
+/* ── 최종 밴 내성 (4~5픽) ───────────────────────────────────────── */
+function v55Foe4(foe, step){
+  let f = (foe || []).filter(Boolean).slice();
+  try{
+    const pr = v55Pred(step);
+    if(f.length < 5 && pr.arr && pr.arr.length){
+      const used = (S.myPre || []).concat(S.oppPre || [], S.my || [], S.opp || []);
+      for(let i=0;i<pr.arr.length && f.length<5;i++){
+        const c = pr.arr[i].code;
+        if(used.indexOf(c) >= 0 || f.indexOf(c) >= 0) continue;
+        f.push(c);
+      }
+    }
+  }catch(e){}
+  if(f.length >= 5){
+    let best = null, bs = -1e9;
+    f.forEach(function(c){
+      let s = null; try{ s = scoreBan(c); }catch(e){}
+      const sc = (s && isFinite(s.sc)) ? s.sc : -1e9;
+      if(sc > bs){ bs = sc; best = c; }
+    });
+    if(best && f.indexOf(best) >= 0) f = f.filter(function(c){ return c !== best; });
+  }
+  return f.slice(0, 4);
+}
+function v55Axes(list){
+  const a = {fire: [], speed: [], care: [], ctrl: [], injury: [], extinct: [], tank: [], topSpd: 0};
+  (list || []).forEach(function(c){
+    if(!H[c]) return;
+    if(v55fire(c)) a.fire.push(c);
+    /* '속도 답'은 실제로 상대 최속보다 먼저 움직이는 카드만 — 상대 최속의 25 이내 + 오프너/난입 */
+    if(v55op(c) || (v55cut(c) >= 2 && v55spd(c) >= 230) || v55spd(c) >= 250) a.speed.push(c);
+    if(v55care(c)) a.care.push(c);
+    if(v55has(c, V55_ATK_DEB)) a.ctrl.push(c);
+    if(v55m(c).injury) a.injury.push(c);
+    if(v55m(c).extinct) a.extinct.push(c);
+    if(v55role(c) === '탱' || v55role(c) === '힐') a.tank.push(c);
+    a.topSpd = Math.max(a.topSpd, v55spd(c));
+  });
+  return a;
+}
+function v55ArchWR(my5, foe4){
+  try{
+    const a = nearestArch(my5), b = nearestArch(foe4);
+    if(!a || !b || !SIM || !SIM.matrix) return null;
+    const row = SIM.matrix[b.key] || {};
+    const cell = row[a.key];
+    if(cell && cell.n >= 100) return {wr: cell.wr, n: cell.n, my: a.k, foe: b.k};
+  }catch(e){}
+  return null;
+}
+function v55BanGuard(code, mine, foe, step){
+  if(!step || step.t !== 'pick' || step.s !== 'my' || (step.i || 0) < 3) return null;
+  const my5 = (mine || []).filter(Boolean).concat([code]);
+  if(my5.length < 5) return null;
+  const foe4 = v55Foe4(foe, step);
+  if(foe4.length < 4) return null;
+  const guard = (S.my && S.my[2]) || null;      /* 3픽 = 밴가드(최종 밴 면제) */
+  let base = null;
+  try{ base = setEstimate(my5, foe4).est; }catch(e){ return null; }
+  /* 상대가 밴할 1명 — 상대가 노릴 이유(banThreat 'opp') + 밴 뒤 승률 하락 폭을 같이 본다.
+     예상 승률 하락만 보면 '상대가 실제로 자를 카드'를 놓친다(카웨릭처럼 상대를 짜증나게 하는 카드). */
+  const cands = [];
+  my5.forEach(function(c){
+    if(c === guard) return;
+    let e = null;
+    try{ e = setEstimate(my5.filter(function(x){ return x !== c; }), foe4).est; }catch(err){}
+    if(e == null) return;
+    let th = 0;
+    try{ th = (banThreat('opp', c) || {}).total || 0; }catch(err){}
+    cands.push({c: c, est: e, th: th, sc: th * 2.2 + (base - e) * 3.0});
+  });
+  if(!cands.length) return null;
+  cands.sort(function(a, b){ return b.sc - a.sc; });
+  const worstC = cands[0].c, worst = cands[0].est;
+  const lowest = cands.reduce(function(m, x){ return (x.est < m) ? x.est : m; }, cands[0].est);
+  /* 최종 밴 내성은 '가장 나쁜 밴' 기준(미니맥스)으로 잡는다 */
+  const worstEst = Math.min(worst, lowest);
+  const rest = my5.filter(function(c){ return c !== worstC; });
+  const ax = v55Axes(rest);
+  const foeSpd = (function(){ let m = 0; ((foe && foe.length) ? foe : foe4 || []).forEach(function(c){ m = Math.max(m, v55spd(c)); }); return m; })();
+  const speedAns = ax.speed.filter(function(c){ return v55spd(c) >= foeSpd - 25; });
+  const sim = v55ArchWR(rest, foe4);
+  const R = v55Route(mine, foe);
+  const gap = base - worstEst;
+  let v = (worstEst - 50) * 0.55;
+  if(sim && sim.wr) v += (sim.wr - 50) * 0.30;
+  v -= Math.max(0, gap - 2.0) * 1.1;
+  const warnings = [];
+  /* 이 픽이 그대로 상대 밴 1순위면, 밴당해 5인 중 4인으로 싸우는 셈이다 — 외다리 픽 */
+  if(worstC === code && lowest === worst){ v -= 3.0; warnings.push('이 픽 = 상대 밴 1순위'); }
+  /* 축을 혼자 책임지는 픽(외다리) — 밴 1장에 그 축이 0이 된다 */
+  const fullAx = v55Axes(my5);
+  const mySpeed = fullAx.speed.filter(function(c){ return v55spd(c) >= foeSpd - 25; });
+  const needSpd = (R.sig.speed.length >= 1 || R.sig.topSpd >= 245);
+  if(needSpd && mySpeed.length === 1 && mySpeed[0] === code){ v -= 6.0; warnings.push('유일한 속도 답'); }
+  if(fullAx.fire.length === 1 && fullAx.fire[0] === code){ v -= 3.0; warnings.push('유일한 딜러'); }
+  if(fullAx.care.length === 1 && fullAx.care[0] === code && (R.sig.dot.length || R.sig.ctrl.length)){ v -= 1.4; warnings.push('유일한 케어'); }
+  if(!ax.fire.length){ v -= 4.0; warnings.push('딜러 0명'); }
+  else if(ax.fire.length >= 2) v += 1.2;
+  const needSpeed = (R.sig.speed.length >= 1 || R.sig.topSpd >= 245);
+  if(needSpeed && !speedAns.length){ v -= 3.2; warnings.push('속도·난입 0명'); }
+  if((R.sig.dot.length || R.sig.ctrl.length) && !ax.care.length){ v -= 1.8; warnings.push('케어 0명'); }
+  const axisN = [ax.fire.length, speedAns.length, ax.care.length, ax.ctrl.length, ax.injury.length || ax.extinct.length].filter(function(x){ return x > 0; }).length;
+  /* 이 카드 혼자 2축 이상(예: 상처+오프너, 화력+제어)을 채우면 밴 1장에 무너지지 않는다 */
+  const ownAx = (function(c){
+    let n = 0;
+    if(v55fire(c)) n++;
+    if(v55op(c) || v55spd(c) >= 250) n++;
+    if(v55has(c, V55_ATK_DEB)) n++;
+    if(v55m(c).injury) n++;
+    if(v55m(c).extinct) n++;
+    if(v55care(c)) n++;
+    return n;
+  })(code);
+  if(ownAx >= 2) v += 1.2;
+  if(axisN >= 3) v += 1.6;
+  else if(axisN <= 1) v -= 1.8;
+  v = Math.max(-6.0, Math.min(6.0, v));
+  const short = (v >= 0 ? '밴 내성 ' : '⛔ 밴 내성 ')
+    + '최악 밴 시 4인 ' + pc(worstEst) + '%'
+    + (warnings.length ? ' · ' + warnings.join('·') + ' 위험' : ' · ' + axisN + '축 유지');
+  const t = (v >= 0 ? '최종 밴 내성 — ' : '⛔ 최종 밴 내성 — ')
+    + '상대가 <b>' + esc(v55n(worstC)) + '</b>를 잘라도 남은 4인 예상 <b>' + pc(worstEst) + '%</b>'
+    + ' (5인 ' + pc(base) + ' · 밴 손실 ' + (gap >= 0 ? '-' : '+') + gap.toFixed(1) + 'p)'
+    + (sim && sim.wr ? ' · 모의 결투 ' + pc(sim.wr) + '%' : '')
+    + (warnings.length ? ' · <b>' + warnings.join('·') + '</b> 위험' : ' · ' + axisN + '축 유지');
+  return {v: v, t: t, short: short, warn: v < 0 ? 1 : 0, worst: worstEst, worstC: worstC, base: base, gap: gap,
+          lowest: lowest, foe4: foe4, axes: ax, speedAns: speedAns, sim: sim};
+}
+
+/* ── 추천 엔진 연결 (② 순수 학습) ───────────────────────────────── */
+const V55WHY = {};
+(function(){
+  const _score = scoreStudy;
+  scoreStudy = function(code, opts){
+    const r = _score(code, opts);
+    try{
+      const st = opts && opts.step;
+      if(!st || st.t !== 'pick' || st.s !== 'my') return r;
+      const mine = mineState(), foe = enemiesState();
+      if(!foe.length) return r;
+      const items = [];
+      let sum = 0;
+      const rt = v55RouteTerms(code, mine, foe);
+      if(rt){
+        sum += rt.v;
+        /* 큰 항목 2개만 사유로 노출한다(작은 항목까지 올리면 v5.1~v5.4 근거가 밀려난다) */
+        rt.hits.filter(function(h){ return Math.abs(h.v) >= 2.0; }).slice(0, 2).forEach(function(h){
+          items.push({v: h.v, t: h.t, warn: h.warn, kind: 'route'});
+        });
+      }
+      const pm = v55Preempt(code, mine, foe, st);
+      if(pm){ sum += pm.v; items.push({v: pm.v, t: pm.t, warn: 0, kind: 'preempt', short: '상대 픽 선점 ' + pc(pm.p * 100)}); }
+      const bg = v55BanGuard(code, mine, foe, st);
+      if(bg){ sum += bg.v; items.push({v: bg.v, t: bg.t, warn: bg.warn, kind: 'ban', short: bg.short}); }
+      if(!items.length) return r;
+      r.sc += sum / V55.L2S;
+      r.parts = r.parts || {};
+      r.parts.v55 = (r.parts.v55 || 0) + sum / V55.L2S;
+      const add = items.filter(function(it){ return it.t; }).map(function(it){
+        return {w: 2.3 + Math.abs(it.v) * 0.5, warn: it.warn ? 1 : 0, v55: it.kind, t: it.t};
+      });
+      /* v5.5 사유(선점·밴 내성·루트)는 카드 맨 앞에 — 추천 이유가 한눈에 보이게 */
+      add.sort(function(a, b){ return (b.warn ? 1 : 0) - (a.warn ? 1 : 0) || b.w - a.w; });
+      r.why = add.concat(r.why || []).slice(0, 8);
+      V55WHY[code] = {v: sum, items: items};
+    }catch(e){}
+    return r;
+  };
+})();
+
+/* ── ③ 통합 — v5.5 보정을 레거시 단위로 다시 얹는다(v54 와 같은 방식) ── */
+(function(){
+  const _blend = blendHybrid;
+  blendHybrid = function(leg, stu){
+    const out = _blend(leg, stu);
+    try{
+      let st = null;
+      try{ st = (typeof activeStep === 'function') ? activeStep() : null; }catch(e){}
+      if(!st || st.t !== 'pick' || st.s !== 'my') return out;
+      const mine = mineState(), foe = enemiesState();
+      if(!foe.length || !out.length) return out;
+      const lr = (leg || []).map(function(r){ return r.sc; });
+      let mu = 0; lr.forEach(function(x){ mu += x; }); mu /= Math.max(1, lr.length);
+      let s2 = 0; lr.forEach(function(x){ s2 += (x - mu) * (x - mu); });
+      const sdL = Math.sqrt(s2 / Math.max(1, lr.length)) || 8;
+      out.forEach(function(r){
+        const it = V55WHY[r.code];
+        let sum = 0;
+        if(it && isFinite(it.v)) sum = it.v;
+        if(!sum) return;
+        r.sc += sum / sdL;
+        if(r.parts) r.parts.v55 = (r.parts.v55 || 0) + sum / V55.L2S;
+        if(it && it.items && it.items.length){
+          const add = it.items.filter(function(x){ return x.t; }).map(function(x){
+            return {w: 2.3 + Math.abs(x.v) * 0.5, warn: x.warn ? 1 : 0, v55: x.kind, t: x.t};
+          });
+          add.sort(function(a, b){ return (b.warn ? 1 : 0) - (a.warn ? 1 : 0) || b.w - a.w; });
+          r.why = add.concat(r.why || []).slice(0, 8);
+        }
+      });
+      out.sort(function(a, b){ return b.sc - a.sc; });
+    }catch(e){}
+    return out;
+  };
+})();
+
+/* ── 화면 — 루트 / 상대 다음 픽 예상 / 최종 밴 내성 ──────────────── */
+const V55_ROUTE_SHORT = {speed: '속도 경합', strip: '성역·버프 무관', cleanse: '정화 무관 축', hpscale: '상처',
+                         dot: '정화·회복', ctrl: '면역·해제', injury: '시간 역행', barrier: '관통',
+                         stall: '화력·관통', balance: '균형'};
+function v55NoteHTML(){
+  if(typeof VIEW !== 'undefined' && VIEW === 'legacy') return '';
+  let mine = [], foe = [];
+  try{ mine = mineState() || []; foe = enemiesState() || []; }catch(e){}
+  if(!foe.length) return '';
+  const bits = [];
+  try{
+    const R = v55Route(mine, foe), f = R.sig;
+    const sig = [];
+    if(f.speed.length) sig.push('속도 '+f.topSpd + (f.fastestName ? '(' + esc(f.fastestName) + ')' : ''));
+    if(f.strip.length) sig.push('강화해제 ' + f.strip.length);
+    if(f.cleanse.length) sig.push('정화 ' + f.cleanse.length);
+    if(f.hpscale.length) sig.push('생명력 비례 ' + f.hpscale.length);
+    if(f.barrier.length) sig.push('보호막 ' + f.barrier.length);
+    if(f.dot.length) sig.push('지속피해 ' + f.dot.length);
+    if(f.injury.length) sig.push('상처 ' + f.injury.length);
+    const short = R.keys.slice(0, 2).map(function(k){ return V55_ROUTE_SHORT[k] || k; }).join(' + ') || '균형';
+    bits.push('<b>루트 ' + esc(short) + '</b>' + (sig.length ? ' — 상대 ' + sig.join('·') : ''));
+  }catch(e){}
+  try{
+    const st = (typeof activeStep === 'function') ? activeStep() : null;
+    if(st && st.t === 'pick' && st.s === 'my'){
+      const pr = v55Pred(st);
+      if(pr.top && pr.top.length){
+        const t2 = pr.top.slice(0, 2).map(function(r){
+          return esc(v55n(r.code)) + ' ' + pc((pr.p[r.code] || 0) * 100) + '%';
+        });
+        bits.push('상대 ' + (pr.step.i + 1) + '픽 예상 ' + t2.join('·'));
+      }
+      /* 밴 내성 — 지금 1순위 추천을 골랐을 때의 최악 밴 결과 */
+      let top = (RECS && RECS.arr && RECS.arr[0]) ? RECS.arr[0].code : null;
+      const it = top ? V55WHY[top] : null;
+      const ban = it ? it.items.filter(function(x){ return x.kind === 'ban'; })[0] : null;
+      if(ban) bits.push('<b>밴 내성</b> ' + esc(String(ban.short || '').replace(/^밴 내성 /, '')));
+    }
+  }catch(e){}
+  if(!bits.length) return '';
+  return '<div class="v55Note">🛡️ v5.5 ' + bits.join(' · ') + '</div>';
+}
+
+
+(function(){
+  const _note = modeNoteHTML;
+  modeNoteHTML = function(){ return _note() + v55NoteHTML(); };
+})();
+(function(){
+  const _cmp = compareHTML;
+  compareHTML = function(rec){ return _cmp(rec) + v55NoteHTML(); };
+})();
+
+/* 카드 한 줄 근거 — v5.5 루트·선점·밴 내성 사유를 우선 노출 */
+(function(){
+  const _r = cmpReason;
+  cmpReason = function(r){
+    const it = V55WHY[r.code];
+    if(it && it.items && it.items.length){
+      const order = ['route', 'preempt', 'ban'];
+      let pick = null;
+      for(let i=0;i<order.length && !pick;i++){
+        const list = it.items.filter(function(x){ return x.kind === order[i] && !x.warn; });
+        if(list.length) pick = list[0];
+      }
+      if(!pick) pick = it.items.filter(function(x){ return x.warn; })[0] || it.items[0];
+      if(pick){
+        const txt = pick.short ? pick.short : String(pick.t).replace(/<[^>]+>/g, '');
+        return briefTxt(txt, 44);
+      }
+    }
+    return _r(r);
+  };
+})();
+
+/* ②③ 카드에 v5.5 표식 */
+(function(){
+  const _card = cmpCard;
+  cmpCard = function(r, mode, idx){
+    const html = _card(r, mode, idx);
+    try{
+      if(mode !== 'legacy'){
+        const it = V55WHY[r.code];
+        if(it && it.v >= 4){
+          const nm = String((it.items.filter(function(x){ return !x.warn; })[0] || {}).t || '').replace(/<[^>]+>/g, '').slice(0, 80);
+          return html.replace('</span>', '</span><i class="v55up" title="v5.5 보정: ' + esc(nm) + '">5.5▲</i>');
+        }
+        if(it && it.v <= -4){
+          const nm = String((it.items[0] || {}).t || '').replace(/<[^>]+>/g, '').slice(0, 80);
+          return html.replace('</span>', '</span><i class="v55dn" title="v5.5 보정: ' + esc(nm) + '">5.5▼</i>');
+        }
+      }
+    }catch(e){}
+    return html;
+  };
+})();
+
+/* 내 조합 점검 — 최종 밴 내성 줄 */
+(function(){
+  const _ra = renderAnalysis;
+  renderAnalysis = function(){
+    _ra();
+    try{
+      const body = $('anBody'); if(!body) return;
+      const mine = (S.my || []).filter(Boolean), foe = (S.opp || []).filter(Boolean);
+      if(mine.length < 4 || foe.length < 3) return;
+      const st = (typeof activeStep === 'function') ? activeStep() : null;
+      const g = v55BanGuard(mine[0], mine.slice(1), foe, {t: 'pick', s: 'my', i: 4});
+      if(!g) return;
+      const ax = g.axes;
+      const chips = [];
+      chips.push('화력 <b>'+ax.fire.length+'</b>');
+      chips.push('속도·난입 <b>'+(g.speedAns ? g.speedAns.length : ax.speed.length)+'</b>');
+      chips.push('케어 <b>'+ax.care.length+'</b>');
+      chips.push('제어 <b>'+ax.ctrl.length+'</b>');
+      const cls = g.v >= 0 ? 'ok' : 'pb warn';
+      const html =
+        '<div class="anRow v55ban"><b>최종 밴 내성</b><div class="v">'
+        + '<span class="'+cls+'">밴 <b>'+esc(v55n(g.worstC))+'</b> 가정 → 남은 4인 <b>'+pc(g.worst)+'%</b></span> '
+        + '<span style="color:#9aabc9">(5인 '+pc(g.base)+'% · 밴 손실 -'+g.gap.toFixed(1)+'p)</span>'
+        + '<div style="margin-top:2px;color:#a9bede">' + chips.join(' · ')
+        + (g.sim && g.sim.wr ? ' · 모의 결투 '+pc(g.sim.wr)+'%' : '') + '</div></div></div>';
+      /* 턴 순서 줄(v5.3) 바로 아래에 — 맨 위 자리는 턴 순서가 지킨다 */
+      const toRow = body.querySelector('.anRow.toRow');
+      if(toRow) toRow.insertAdjacentHTML('afterend', html);
+      else body.insertAdjacentHTML('afterbegin', html);
+    }catch(e){}
+  };
+})();
+
 document.addEventListener('click', function(ev){
   const mb = ev.target.closest('[data-view]');
   if(mb){ ev.preventDefault(); setView(mb.dataset.view); return; }
@@ -8294,7 +8988,7 @@ window.__app = {get S(){return S;}, get recs(){return RECS;}, H:H, LIST:LIST, ge
     playerBadge:playerBadge, deckThreat:deckThreat, fireOf:fireOf, fireStatus:fireStatus, fireCount:fireCount, aceInfo:aceInfo, myCore:myCore, scorePick:scorePickLegacy, caseDraft:caseDraft, get MDB(){return MDB;}, get player(){return playerStats;}, get SKP(){return SKP;}, skHas:skHas, skSkill:skSkill, skSkillLabel:skSkillLabel, elDiff:elDiff, skillClash:skillClash, elementClash:elementClash, targetRank:targetRank, skPassive:skPassive, skF:skF, targetReason:targetReason, turnPlan:turnPlan, get fitOn(){return fitOn();}, roleModel:roleModel, rmCombo:rmCombo, rmTriple:rmTriple, rmPrebanN:rmPrebanN, rmModels:rmModels, DEFAULT_UNOWNED:DEFAULT_UNOWNED, applyDefaultUnowned:applyDefaultUnowned, get missing(){return S.missing;}, patch:patOf, get PATD(){return PATD;}, setTab:setTab, get tab(){return TAB;}, teamEstimate:teamEstimate, renderMobCheck:renderMobCheck, renderMobBar:renderMobBar, mobTurn:mobTurn,
     openHist:openHist, exitHist:exitHist, histApply:histApply, histRecs:computeRecsAt, renderHist:renderHist, stateBeforeStep:stateBeforeStep,
     get histView(){return HISTVIEW;}, formationPlan:formationPlan, placeLine:placeLine, formationFit:formationFit, condPick:condPick, skillHasAny:skillHasAny, fPref:fPref, fKit:fKit, condOf:condOf, hasCond:hasCond, condLine:condLine, condRowHTML:condRowHTML, get FORM(){return FORM;},
-    get DS(){return DS;}, get SIM(){return SIM;}, get VIEW(){return VIEW;}, setView:setView, scoreStudy:scoreStudy, scorePickLegacy:scorePickLegacy, nearestArch:nearestArch, fullSpec:fullSpec, heroArt:heroArt, compareHTML:compareHTML, renderModeBar:renderModeBar, mrOf:mrOf, foeMech:foeMech, mechPick:mechPick, v51MechWarn:v51MechWarn, briefFrom:briefFrom, get viewName(){return VIEW_NAME[VIEW];}, dsFeat:dsFeat, teamVec:teamVec, turnOrder8:turnOrder8, turnCluster:turnCluster, spdOf:spdOf, spdPick:spdPick, turnOrderHTML:turnOrderHTML, turnBriefHTML:turnBriefHTML, v53SpeedWarn:v53SpeedWarn, v54SoulRisk:v54SoulRisk, v54NotosPick:v54NotosPick, foeHitPressure:foeHitPressure, soulDenyFoe:soulDenyFoe, simSoulEv:simSoulEv, v54Situational:v54Situational, blendHybrid:blendHybrid};
+    get DS(){return DS;}, get SIM(){return SIM;}, get VIEW(){return VIEW;}, setView:setView, scoreStudy:scoreStudy, scorePickLegacy:scorePickLegacy, nearestArch:nearestArch, fullSpec:fullSpec, heroArt:heroArt, compareHTML:compareHTML, renderModeBar:renderModeBar, mrOf:mrOf, foeMech:foeMech, mechPick:mechPick, v51MechWarn:v51MechWarn, briefFrom:briefFrom, get viewName(){return VIEW_NAME[VIEW];}, dsFeat:dsFeat, teamVec:teamVec, turnOrder8:turnOrder8, turnCluster:turnCluster, spdOf:spdOf, spdPick:spdPick, turnOrderHTML:turnOrderHTML, turnBriefHTML:turnBriefHTML, v53SpeedWarn:v53SpeedWarn, v54SoulRisk:v54SoulRisk, v54NotosPick:v54NotosPick, foeHitPressure:foeHitPressure, soulDenyFoe:soulDenyFoe, simSoulEv:simSoulEv, v54Situational:v54Situational, blendHybrid:blendHybrid, scoreOppPick:scoreOppPick, setEstimate:setEstimate, v55Route:v55Route, v55RouteTerms:v55RouteTerms, v55Preempt:v55Preempt, v55BanGuard:v55BanGuard, v55Foe4:v55Foe4, v55Pred:v55Pred, v55NextOppStep:v55NextOppStep, v55NoteHTML:v55NoteHTML, v55FoeSig:v55FoeSig, v55MineSig:v55MineSig, v55Axes:v55Axes, v55Threat:v55Threat, get V55(){return V55;}, get V55WHY(){return V55WHY;}, isCareCard:isCareCard, isHoldCard:isHoldCard, isDD:isDD, isOpenerCard:isOpenerCard, cutinLv:cutinLv, steps:steps};
 })();
 </script>
 </body>
