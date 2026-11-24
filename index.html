@@ -7475,6 +7475,17 @@ function v51MechWarn(mine, foe){
   };
 })();
 
+/* v5.1 : 카드 한 줄 근거에서 원문 메커니즘 근거(인왕서기·상처·성역 등)를 우선 노출 */
+(function(){
+  const _reason = cmpReason;
+  cmpReason = function(r){
+    const l = (r && r.why) || [];
+    const m = l.filter(function(w){ return w.mech && !w.warn; });
+    if(m.length) return briefTxt(String(m[0].t).replace(/<[^>]+>/g,''), 40);
+    return _reason(r);
+  };
+})();
+
 document.addEventListener('click', function(ev){
   const mb = ev.target.closest('[data-view]');
   if(mb){ ev.preventDefault(); setView(mb.dataset.view); return; }
