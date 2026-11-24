@@ -8876,7 +8876,8 @@ function v55NoteHTML(){
       const R2 = v55Route(mine, foe);
       if(R2.key === 'speed' && R2.sig.topSpd >= 245){
         const top3 = RECS.byMode.legacy.slice(0, 3).map(function(r){ return r.code; });
-        const slowN = top3.filter(function(c){ return !v55op(c) && v55spd(c) < R2.sig.topSpd - 25; }).length;
+        /* 실제로 상대 최속보다 먼저 못 움직이는 카드(오프너 태그가 있어도 속도가 모자라면 포함) */
+        const slowN = top3.filter(function(c){ return v55spd(c) < R2.sig.topSpd - 25; }).length;
         if(slowN >= 2) bits.push('<b>⚠ ① 기존 열</b> 상위 ' + slowN + '장이 느린 받아치기 — 상대 최속 ' + R2.sig.topSpd + '에는 ②③ 루트를 보세요');
       }
     }
