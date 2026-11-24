@@ -8255,6 +8255,17 @@ function v54NoteHTML(){
   };
 })();
 
+/* ── 카드 한 줄 근거 — v5.4 보정 사유를 우선 노출 ─────────────────── */
+(function(){
+  const _r = cmpReason;
+  cmpReason = function(r){
+    const l = (r && r.why) || [];
+    const good = l.filter(function(w){ return w.v54 && !w.warn; });
+    if(good.length) return briefTxt(String(good[0].t).replace(/<[^>]+>/g, ''), 40);
+    return _r(r);
+  };
+})();
+
 document.addEventListener('click', function(ev){
   const mb = ev.target.closest('[data-view]');
   if(mb){ ev.preventDefault(); setView(mb.dataset.view); return; }
