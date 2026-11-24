@@ -8934,10 +8934,16 @@ function v55NoteHTML(){
     _ra();
     try{
       const body = $('anBody'); if(!body) return;
-      const mine = (S.my || []).filter(Boolean), foe = (S.opp || []).filter(Boolean);
+      let mine = (S.my || []).filter(Boolean);
+      const foe = (S.opp || []).filter(Boolean);
       if(mine.length < 4 || foe.length < 3) return;
-      const st = (typeof activeStep === 'function') ? activeStep() : null;
-      const g = v55BanGuard(mine[0], mine.slice(1), foe, {t: 'pick', s: 'my', i: 4});
+      /* 4픽까지 골랐으면 '지금 1순위 추천'을 5번째로 놓고 밴 내성을 미리 본다 */
+      if(mine.length === 4){
+        const top = (RECS && RECS.arr && RECS.arr[0]) ? RECS.arr[0].code : null;
+        if(top) mine = mine.concat([top]);
+      }
+      if(mine.length < 5) return;
+      const g = v55BanGuard(mine[4], mine.slice(0, 4), foe, {t: 'pick', s: 'my', i: 4});
       if(!g) return;
       const ax = g.axes;
       const chips = [];
