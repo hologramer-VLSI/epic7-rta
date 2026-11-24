@@ -7077,7 +7077,7 @@ function mechPick(code, mine, foe){
     if(M.time_reversal){
       const ab = (SIM && SIM.timerevAblation) || null;
       const dtxt = (ab && ab.delta != null) ? ' <small>모의 결투 ON/OFF +'+pc(ab.delta)+'%p</small>' : '';
-      up(4.8, '상대 '+nm(e)+'의 <b>상처</b>를 <b>시간 역행</b>으로 되돌립니다 — 전투 시작 상태로 복귀해 '
+      up(7.0, '상대 '+nm(e)+'의 <b>상처</b>를 <b>시간 역행</b>으로 되돌립니다 — 전투 시작 상태로 복귀해 '
               +'상처(최대 생명력 감소)를 완전 회복'+dtxt);
     }
     if(hpScale)
