@@ -7077,7 +7077,7 @@ function mechPick(code, mine, foe){
     if(M.time_reversal){
       const ab = (SIM && SIM.timerevAblation) || null;
       const dtxt = (ab && ab.delta != null) ? ' <small>모의 결투 ON/OFF +'+pc(ab.delta)+'%p</small>' : '';
-      up(3.4, '상대 '+nm(e)+'의 <b>상처</b>를 <b>시간 역행</b>으로 되돌립니다 — 전투 시작 상태로 복귀해 '
+      up(4.8, '상대 '+nm(e)+'의 <b>상처</b>를 <b>시간 역행</b>으로 되돌립니다 — 전투 시작 상태로 복귀해 '
               +'상처(최대 생명력 감소)를 완전 회복'+dtxt);
     }
     if(hpScale)
@@ -7496,6 +7496,17 @@ function v51MechWarn(mine, foe){
       if(F.target_lock.length) bits.push('상대 <b>인왕서기</b>(단일 리다이렉트)');
       if(F.injury.length) bits.push('상대 <b>상처</b>(최대 생명력 감소)');
       if(F.time_reversal.length) bits.push('상대 <b>시간 역행</b>(상처 초기화)');
+      /* v5.2 : 상대가 상처 조합이면 내 진영의 시간 역행 카운터를 바로 알린다 */
+      if(F.injury.length){
+        try{
+          const used = (mineState()||[]).concat(enemiesState()||[]);
+          const cand = Object.keys(DS.heroes||{}).filter(function(c){
+            return (DS.heroes[c].mr||{}).time_reversal && used.indexOf(c) < 0 && H[c];
+          });
+          if(cand.length) bits.push('상처 카운터 <b>'+cand.map(function(c){ return H[c].name; }).slice(0,2).join('·')
+            +'</b> — 시간 역행으로 상처 회복');
+        }catch(e){}
+      }
       if(F.buff_immune.length) bits.push('상대 <b>투쟁의 성역</b>');
       if(bits.length) extra = '<div class="mechNote">⚠ ' + bits.join(' · ') + ' 반영</div>';
     }catch(e){}
