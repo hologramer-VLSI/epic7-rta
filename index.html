@@ -8869,6 +8869,18 @@ function v55NoteHTML(){
       if(ban) bits.push('<b>밴 내성</b> ' + esc(String(ban.short || '').replace(/^밴 내성 /, '')));
     }
   }catch(e){}
+  /* 3갈래 비교에서 ① 기존 v4.13 열이 느린 받아치기로 채워졌으면 경고 —
+     ①은 회귀용으로 값이 고정돼 있어(사용자 지시) 그 열만 따라가면 v5.5 개선이 적용되지 않는다. */
+  try{
+    if(typeof VIEW !== 'undefined' && VIEW === 'compare' && RECS && RECS.byMode && RECS.byMode.legacy){
+      const R2 = v55Route(mine, foe);
+      if(R2.key === 'speed' && R2.sig.topSpd >= 245){
+        const top3 = RECS.byMode.legacy.slice(0, 3).map(function(r){ return r.code; });
+        const slowN = top3.filter(function(c){ return !v55op(c) && v55spd(c) < R2.sig.topSpd - 25; }).length;
+        if(slowN >= 2) bits.push('<b>⚠ ① 기존 열</b> 상위 ' + slowN + '장이 느린 받아치기 — 상대 최속 ' + R2.sig.topSpd + '에는 ②③ 루트를 보세요');
+      }
+    }
+  }catch(e){}
   if(!bits.length) return '';
   return '<div class="v55Note">🛡️ v5.5 ' + bits.join(' · ') + '</div>';
 }
