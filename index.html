@@ -9507,8 +9507,19 @@ function v56NoteHTML(){
     const holder = v56SpdCapHolder(mine);
     if(holder){
       const spdPicks = mine.filter(function(c){ return v56op(c) && v56spd(c) >= 250 && c !== holder; });
-      bits.push('<b>아군 ' + esc(v56n(holder)) + ' 상한 ' + Math.round(0.9 * v56spd(holder)) + '</b> — '
-        + (spdPicks.length ? spdPicks.slice(0, 2).map(v56n).join('·') + ' 선턴 무효' : '속도 오프너 대신 저속 브루저'));
+      let tail = spdPicks.length ? spdPicks.slice(0, 2).map(v56n).join('·') + ' 선턴 무효'
+        : '속도 오프너 대신 저속 브루저';
+      /* 3갈래 비교: ① 기존 열은 회귀용으로 고정돼 있어, 그 열의 상위가 속도 상한과 충돌하면 알린다 */
+      try{
+        if(typeof VIEW !== 'undefined' && VIEW === 'compare' && RECS && RECS.byMode && RECS.byMode.legacy){
+          const bad = RECS.byMode.legacy.slice(0, 3).filter(function(r){
+            return r.code !== holder && v56op(r.code) && v56spd(r.code) >= 250;
+          });
+          if(bad.length) tail = (spdPicks.length ? spdPicks.slice(0, 1).map(v56n).join('') + ' 선턴 무효 · ' : '')
+            + '⚠ ① 열 ' + v56n(bad[0].code) + '도 속도 상한 충돌';
+        }
+      }catch(e){}
+      bits.push('<b>아군 ' + esc(v56n(holder)) + ' 상한 ' + Math.round(0.9 * v56spd(holder)) + '</b> — ' + tail);
     }
   }catch(e){}
   /* ③ 피격 반응 상대 — 선픽 4~5픽에서는 ①이 같은 말을 하므로 생략 */
