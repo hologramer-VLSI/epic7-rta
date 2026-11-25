@@ -3674,10 +3674,10 @@ function scorePick(code, opts){
       isAce = !!ace.top;
       /* v4.13 : 3픽(밴가드)은 상대 최종 밴에서 지켜지는 자리 — 내가 실제로 이기는 에이스 가치를 더 준다 */
       /* v4.14 : 밴가드 가치는 '이 자리에서 실제로 쓰는 카드'일 때만 — 3픽에 거의 안 나오는 카드(프리렌 0.33%)는 0 */
-      const aceKeep = (st.i===2 && po) ? (po.share>=0.01 ? Math.max(0.6, Math.min(1, 0.6+0.4*Math.min(1, po.share/0.05))) : 0) : 1;
+      const aceKeep = (st.i===2 && po) ? (po.rank<=30 ? Math.max(0.6, Math.min(1, 0.6+0.4*Math.min(1, po.share/0.05))) : 0) : 1;
       add('ace', ace.bonus * (st && st.i===2 ? 1.5 : 1) * aceKeep);
       /* 3픽은 상대 최종 밴에서 지켜지는 자리 — 내가 실제로 이기는 에이스가 이 자리에서도 쓰이면 한 번 더 */
-      if(st.i===2 && ace.top && po && po.share>=0.01) add('ace', 3.5);
+      if(st.i===2 && ace.top && po && po.rank<=30) add('ace', 3.5);
       why.push({w:5.4, gold:1, ace:ace.top?1:0, fire:ace.fire?1:0,
         t:'<b>3픽 밴가드</b> — 상대 최종 밴에서 지켜지는 자리, 내 '+(ace.fire?'핵심 딜러':'에이스')+' <b>'+h.name+'</b> 보호 픽'+(ace.why?' ('+ace.why+')':'')});
     }
