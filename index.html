@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#070a12">
-<title>에픽세븐 실레나 밴픽 v5.5 · VLSI 전적 맞춤</title>
+<title>에픽세븐 실레나 밴픽 v5.6 · VLSI 전적 맞춤</title>
 <style>
 :root{
   --bg:#070a12; --bg2:#0b1020; --panel:#0f1729; --panel2:#131f36;
@@ -1259,6 +1259,13 @@ button{font-family:inherit}
 .anRow.v55ban .ok{color:#8ef0a8}
 @media (max-width:920px){.v55Note{font-size:9px;padding:2px 6px 3px}}
 
+/* ===== v5.6 : 선픽 카운터 · 아군 속도 상한 · 어린 셰나 · 밴 후 4인 ===== */
+.v56Note{padding:3px 8px 4px;font-size:9.5px;font-weight:800;color:#c8f0b8;background:rgba(120,220,120,.07);border-bottom:1px dashed rgba(150,230,140,.45);line-height:1.32}
+.v56Note b{color:#e4ffd8}
+.v56up{font-style:normal;font-size:7px;font-weight:900;color:#8ef0a8;border:1px solid rgba(120,255,170,.45);border-radius:4px;padding:0 1px;margin-left:2px;flex:0 0 auto}
+.v56dn{font-style:normal;font-size:7px;font-weight:900;color:#ff9d9d;border:1px solid rgba(255,120,120,.5);border-radius:4px;padding:0 1px;margin-left:2px;flex:0 0 auto}
+@media (max-width:920px){.v56Note{font-size:9px;padding:2px 6px 3px}}
+
 </style>
 </head>
 <body data-tab="board">
@@ -1267,7 +1274,7 @@ button{font-family:inherit}
   <div class="top">
     <div class="brand">
       <div class="mark">⚔️</div>
-      <div><b>에픽세븐 실레나 밴픽<span class="vtag">v5.5</span></b><span id="subTitle">VLSI 맞춤 · 최신 실전</span></div>
+      <div><b>에픽세븐 실레나 밴픽<span class="vtag">v5.6</span></b><span id="subTitle">VLSI 맞춤 · 최신 실전</span></div>
     </div>
     <div class="spacer"></div>
     <span class="chip data" id="dataChip" title="실제 전적검색 전투 기록">🏆 실전 <b>—</b></span><span class="chip" id="seasonChip">2026 폴 · ss21</span>
@@ -8979,6 +8986,606 @@ function v55NoteHTML(){
   };
 })();
 
+/* ════════════════════════════════════════════════════════════════════
+   v5.6 : 선픽 카운터 예방 · 아군 하르세티 속도 충돌 차단 · 어린 셰나 대응 · 밴 후 4인 축
+   ────────────────────────────────────────────────────────────────────
+   사용자 지적(2026-11-25, 선픽 패배 판 · 보드 스크린샷 3장)
+     "나 선픽일 때 카운터 맞았는데 맞을거 고려하고 최선의 책을 좀 잡아봐 이건 아닌거 같아 나 졌어"
+
+   실제 판(선픽 BLUE) — 내 프리밴 천칭의 주인·리안나 / 상대 프리밴 리제트·리안나
+     내 픽: 마피네 → 하르세티 → 어목디 → 신월의 루나 → 메이린(최종 밴)
+     상대 픽: 테네브리아 → 에스텔(최종 밴) → 어린 셰나 → 헤카테 → 이바나
+
+   v5.5 가 놓친 네 가지를 메운다.
+   ① 선픽 카운터 예방 (내가 A픽/선픽일 때만)
+      후보 X 의 '아직 살아 있는 강카운터'를 ①공식 카운터 DB ②실전 매치업(내 카드 상대 승률)
+      ③메커니즘(광역→피격반응, 생명력비례→상처, 불사→소멸, 속도→속도상한, 스킬딜→침묵,
+      버프→강화해제)로 모아 놓고, 상대가 다음 픽에서 그 카운터를 가져갈 확률(v55 예측)로
+      가중해 '선픽 카운터 노출' 감점 + 경고를 준다. 2~3픽에서는 그 카운터를 내가 먼저
+      가져오는 '미리 차단' 가산으로 뒤집는다.
+   ② 아군 하르세티(모든 영웅 속도 = 하르세티 속도 90% ≈ 135) 충돌
+      내 팀에 속도 상한 필드 카드가 있으면 '속도로 선턴을 잡는' 카드(순수 오프너·선턴 딜러·
+      속도 비례 피해)를 강하게 감점하고, 하르세티 전장에서 실제로 강한
+      저속 브루저·반격/피격반응·불사·행게 난입·상처로 돌린다.
+   ③ 상대 어린 셰나(피격 반응 패시브: 약화해제 + 추가공격 + 추가턴)
+      '맞을수록 세지는' 상대에게 광역·다중타를 쌓는 픽을 감점(2장째부터 누적)하고,
+      상처·봉인·회복불가·단일 강타·관통·비공격 추가턴으로 선회시킨다.
+   ④ 밴 1장 뒤 4인 성립 — 힐/정화(케어) 0명 · 실질 화력 1명 이하 · 단일 축 0명이면 감점,
+      이 픽이 얇은 축을 2장으로 이중화하면 가산(외다리 방지).
+   ⑤ ① 기존 v4.13(legacy) 순위·점수는 그대로 둔다. ②③에만 얹는다.
+   ════════════════════════════════════════════════════════════════════ */
+const V56 = {L2S: 2.6, VER: '5.6'};
+
+/* ── 접근자 ─────────────────────────────────────────────────────── */
+function v56n(c){ return (H[c] && (H[c].name || H[c].n)) || c; }
+/* 목적격 조사 — 받침 유무로 을/를 */
+function v56obj(c){
+  const n = v56n(c);
+  const ch = n.charCodeAt(n.length - 1);
+  if(ch < 0xac00 || ch > 0xd7a3) return n + '을';
+  return n + ((ch - 0xac00) % 28 ? '을' : '를');
+}
+function v56mr(c){ try{ return mrOf(c) || {}; }catch(e){ return {}; } }
+function v56labs(c){
+  if(V56_LABC[c]) return V56_LABC[c];
+  const s = {};
+  try{ for(let i=1;i<=3;i++) slotK(c,i).forEach(function(l){ s[l]=1; }); }catch(e){}
+  V56_LABC[c] = s;
+  return s;
+}
+function v56lab(c, l){ return !!v56labs(c)[l]; }
+function v56spd(c){ try{ return spdOf(c).med || 200; }catch(e){ return 200; } }
+function v56cut(c){ try{ return cutinLv(c) || 0; }catch(e){ return 0; } }
+function v56role(c){ return String((H[c] && H[c].role) || ''); }
+function v56op(c){ try{ return isOpenerCard(c); }catch(e){ return false; } }
+function v56fire(c){ try{ return !!fireOf(H[c]); }catch(e){ return false; } }
+/* 실질 케어 — 힐·서포터 계열만. 탱커의 약화해제 한 줄로 '케어 있음' 처리하지 않는다
+   (사용자가 패배 판에서 지적한 '힐/정화 0명'을 그대로 세기 위해). */
+function v56care(c){
+  const h = H[c]; if(!h) return false;
+  return /힐|서포터/.test(String(h.role || ''));
+}
+function v56hpScale(c){
+  const M = v56mr(c);
+  if(M.hp_scale) return true;
+  const sc = M.scale || {};
+  return Object.keys(sc).some(function(k){ return sc[k] === 'hp'; });
+}
+/* 맞을수록 세지는 상대에게 불리한 공격 모양 */
+function v56hit(c){
+  const L = v56labs(c), M = v56mr(c);
+  const aoe = !!L['광역'];
+  const extra = !aoe && !!(M.dual || M.extra_attack);          /* 추가턴·협공으로 때리는 횟수 */
+  const add = !aoe && !extra && !!(L['추가공격'] || M.additional_damage);  /* 같은 스킬의 추가 한 대 */
+  return {aoe: aoe, extra: extra, add: add, multi: aoe || extra || add};
+}
+const V56_LABC = {};
+const V56_DEB = ['기절', '수면', '침묵', '봉인', '속박', '도발', '쿨밀기', '행게감소', '회복불가'];
+
+/* ── 살아 있는 풀 (상대가 아직 가져갈 수 있는 카드) ──────────────── */
+let V56_POOL = {key: '', set: null};
+function v56Pool(st){
+  const key = [st.s, st.i, S.first, (S.my || []).join(''), (S.opp || []).join(''),
+               (S.myPre || []).join(''), (S.oppPre || []).join('')].join('|');
+  if(V56_POOL.key === key && V56_POOL.set) return V56_POOL.set;
+  const out = {};
+  let arr = [];
+  try{ arr = candidates({step: st, ignoreMissing: true}); }catch(e){ arr = []; }
+  arr.forEach(function(h){ out[h.code] = 1; });
+  V56_POOL = {key: key, set: out};
+  return out;
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   ① 선픽 카운터 인덱스 — 후보 X 를 받아칠 수 있는 카드 (한 번만 계산)
+   ════════════════════════════════════════════════════════════════════ */
+let V56_IDX = null;
+function v56Idx(){
+  if(V56_IDX) return V56_IDX;
+  const codes = (LIST || []).map(function(h){ return h.code; }).filter(function(c){ return !!H[c]; });
+  /* 메커니즘별 '대응 카드' 풀 — 각 카드가 무엇을 처벌하는가 */
+  const ANS = {hit: [], hp: [], imm: [], spd: [], skill: [], buff: []};
+  codes.forEach(function(c){
+    const M = v56mr(c), L = v56labs(c);
+    const put = function(k, w){ if(w > 0) ANS[k].push({c: c, w: w}); };
+    /* 맞으면서 '되받는' 카드만 — 힐·서포터의 피격 반응(회복)은 카운터가 아니다 */
+    if((M.after_attacked || M.counter || L['반격']) && (!/힐|서포터/.test(v56role(c)) || v56fire(c))
+       && (M.after_attacked || L['반격'] || v56fire(c)))
+      put('hit', 1.9 + (M.after_attacked ? 0.4 : 0) + (v56fire(c) ? 0.3 : 0));
+    if(M.injury || M.injury_skill) put('hp', 2.2 + (M.injury_skill ? 0.6 : 0));
+    if(M.extinct || M.revive_deny) put('imm', 2.2);
+    if(M.spd_cap || M.cr_lock) put('spd', 2.2);
+    if(M.silence || M.cd_push || L['침묵'] || L['쿨밀기']) put('skill', 1.6 + (M.silence ? 0.5 : 0));
+    if(M.strip || L['강화해제']) put('buff', 1.1);
+  });
+  const LAB = {hit: '광역·다중타 처벌', hp: '상처', imm: '소멸·부활봉쇄', spd: '속도 상한·행게 잠금',
+               skill: '침묵·쿨밀기', buff: '강화해제'};
+  const ans = {};
+  codes.forEach(function(X){
+    const M = v56mr(X), L = v56labs(X), hit = v56hit(X), role = v56role(X);
+    const keys = [];
+    if(hit.aoe || hit.multi) keys.push('hit');
+    if(v56hpScale(X)) keys.push('hp');
+    if(M.immortal || M.revive || L['불사'] || L['부활']) keys.push('imm');
+    if(M.spd_scale || /선턴/.test(role) || v56spd(X) >= 265) keys.push('spd');
+    if(!hit.multi && !hit.aoe && !M.counter && !M.after_attacked && /누커|딜러/.test(role)) keys.push('skill');
+    if(M.atk_up || M.barrier || L['보호막'] || L['공격력증가'] || L['면역']) keys.push('buff');
+    const map = {};
+    const add = function(y, w, why){
+      if(y === X || !H[y]) return;
+      const cur = map[y];
+      if(!cur || cur.w < w) map[y] = {c: y, w: w, why: why};
+      else if(why && String(cur.why).indexOf(why) < 0) cur.why = cur.why + ' · ' + why;
+    };
+    /* ⓐ 공식 카운터 DB (392명 카운터·대응 태그 병합본) */
+    (H[X].ctr || []).forEach(function(y){ add(y, 1.5, '공식 카운터'); });
+    /* ⓐ-2 기믹 리더 전용 큐레이션 대응표 (스킬 원문 근거가 붙어 있는 표) */
+    const CUR = (X === 'c1153' && typeof HARS_CTR !== 'undefined') ? HARS_CTR
+              : (X === 'c2181' && typeof NOTOS_CTR !== 'undefined') ? NOTOS_CTR : null;
+    if(CUR) Object.keys(CUR).forEach(function(y){ add(y, CUR[y][0], '기믹 대응'); });
+    /* ⓑ 실전 매치업 — 이 카드를 실제로 이기는 카드 */
+    codes.forEach(function(y){
+      let q = null;
+      try{ q = muWR(y, X); }catch(e){}
+      if(q && q.n >= 30 && q.wr >= 55.5)
+        add(y, 1.1 + Math.min(2.2, (q.wr - 55) * 0.16), '실전 ' + pc(q.wr) + '%(' + q.n + '판)');
+    });
+    /* ⓒ 메커니즘 대응 */
+    keys.forEach(function(k){
+      (ANS[k] || []).forEach(function(a){ add(a.c, a.w, LAB[k]); });
+    });
+    ans[X] = Object.keys(map).map(function(y){ return map[y]; })
+      .sort(function(a, b){ return b.w - a.w; }).slice(0, 12);
+  });
+  V56_IDX = {ans: ans};
+  return V56_IDX;
+}
+
+/* 선픽 카운터 노출 — 내가 선픽일 때 1~3픽 */
+function v56FirstRisk(code, mine, foe, st){
+  if(!st || st.t !== 'pick' || st.s !== 'my') return null;
+  if(S.first !== 'me') return null;            /* 선픽(A픽)일 때만 */
+  if((st.i || 0) > 2) return null;             /* 1~3픽 */
+  const idx = v56Idx();
+  const list = idx.ans[code] || [];
+  if(!list.length) return null;
+  const pool = v56Pool(st);
+  let pr = null;
+  try{ pr = v55Pred(st); }catch(e){}
+  let risk = 0; const hits = [];
+  list.forEach(function(a){
+    if(!pool[a.c]) return;
+    if(a.w < 1.8) return;                        /* 약한 대응(공식 목록 1.5점)은 노출에서 뺀다 */
+    const p = Math.max(0.012, Math.min(0.35, (pr && pr.p && pr.p[a.c]) || 0));
+    const v = (a.w - 1.5) * p;                   /* '카운터'로서의 강도만 */
+    risk += v;
+    hits.push({c: a.c, w: a.w, p: p, v: v, why: a.why});
+  });
+  hits.sort(function(a, b){ return b.v - a.v || b.w - a.w; });
+  const liveN = list.slice(0, 5).filter(function(a){ return pool[a.c]; }).length;
+  let v = -Math.min(5.0, risk * 9.0);
+  let t = null;
+  if(hits.length && v <= -2.2){
+    const top2 = hits.slice(0, 2).map(function(h){ return '<b>' + esc(v56n(h.c)) + '</b> ' + pc(Math.round(h.p * 100)) + '%'; });
+    t = '<b>선픽 카운터 노출</b> — <b>' + esc(v56obj(code)) + '</b> 먼저 열면 상대가 '
+      + top2.join('·') + '로 받아칩니다 · 상위 카운터 ' + liveN + '/5 생존'
+      + ' — 지금 안 꺾으면 ' + esc(v56n(hits[0].c)) + ' 각';
+  } else if(!hits.length || risk < 0.04){
+    v = 1.2;
+    if((st.i || 0) >= 1) t = '<b>선픽 안정</b> — <b>' + esc(v56n(code)) + '</b>의 주요 카운터가 이미 프리밴·소모됐습니다';
+  }
+  const warn = (v <= -2.2) ? 1 : 0;
+  if(!t) v = Math.min(v, 0);
+  return {v: v, t: t, risk: risk, hits: hits, liveN: liveN,
+          short: t ? (v < 0
+              ? liveN + '/5 생존 — ' + hits.slice(0, 2).map(function(h){ return v56n(h.c) + ' ' + pc(Math.round(h.p * 100)) + '%'; }).join('·')
+              : '주요 카운터 프리밴·소모') : null,
+          warn: warn};
+}
+
+/* 2~3픽 — 내가 이미 뽑은 카드의 카운터를 상대가 쓰기 전에 미리 가져오기 */
+function v56PreemptAnswer(code, mine, foe, st){
+  if(!st || st.t !== 'pick' || st.s !== 'my') return null;
+  if(S.first !== 'me') return null;
+  if((st.i || 0) < 1 || (st.i || 0) > 2) return null;
+  if(!mine || !mine.length) return null;
+  const idx = v56Idx();
+  let best = null;
+  mine.forEach(function(m){
+    const a = (idx.ans[m] || []).filter(function(x){ return x.c === code; })[0];
+    if(a && (!best || a.w > best.w)) best = {m: m, w: a.w, why: a.why};
+  });
+  if(!best || best.w < 2.0) return null;
+  let pr = null;
+  try{ pr = v55Pred(st); }catch(e){}
+  const p = (pr && pr.p && pr.p[code]) || 0;
+  const v = Math.min(4.4, 1.0 + best.w * 0.65 + p * 5.0);
+  return {v: v, t: '<b>선픽 카운터 미리 차단</b> — 내 <b>' + esc(v56n(best.m)) + '</b>의 카운터 '
+    + '<b>' + esc(v56n(code)) + '</b>(' + esc(best.why) + ')를 상대가 쓰기 전에 가져옵니다'
+    + (p >= 0.05 ? ' · 상대 예상 ' + pc(Math.round(p * 100)) + '%' : ''),
+    short: v56n(best.m) + ' 카운터 ' + v56n(code) + ' 선점', warn: 0};
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   ② 아군 하르세티 — 모든 영웅 속도 = 하르세티 속도 90%
+   ════════════════════════════════════════════════════════════════════ */
+function v56SpdCapHolder(mine){
+  const hit = (mine || []).filter(function(c){
+    return c && FIELD_FX[c] && FIELD_FX[c].kind === 'spd_cap';
+  });
+  return hit[0] || null;
+}
+function v56AllySpdCap(code, mine){
+  const holder = v56SpdCapHolder(mine);
+  if(!holder || code === holder) return null;
+  const capV = Math.round(0.9 * v56spd(holder));
+  const sp = v56spd(code);
+  const M = v56mr(code), L = v56labs(code), role = v56role(code);
+  const hit = v56hit(code);
+  let v = 0; const bits = [];
+  const add = function(x, t){ if(!x) return; v += x; bits.push({v: x, t: t}); };
+  /* 속도를 '엔진'으로 쓰는가 — 이건 그대로 꺼진다 */
+  const spdEngine = M.spd_scale ? '속도 비례 피해' : (/선턴/.test(role) ? '선턴 딜러' : '');
+  if(spdEngine) add(-6.0, '⛔ <b>아군 ' + esc(v56n(holder)) + '</b> — 속도 상한 ' + capV
+    + ': 내 <b>' + esc(v56n(code)) + '</b>은 <b>' + spdEngine + '</b>라 ' + sp + '→' + capV + '로 깎여 기믹이 통째로 꺼집니다');
+  else if(v56op(code) && sp >= 270) add(-5.0, '⛔ <b>아군 ' + esc(v56n(holder)) + '</b> — 속도 상한 ' + capV
+    + ': <b>' + esc(v56n(code)) + '</b>의 선턴(' + sp + ')이 무효화됩니다');
+  else if(/누커/.test(role) && sp >= 275) add(-3.2, '⛔ <b>아군 ' + esc(v56n(holder)) + '</b>의 속도 상한 ' + capV
+    + ' — 선턴 누커 <b>' + esc(v56n(code)) + '</b>(' + sp + ')의 첫 턴 이점이 사라집니다');
+  else if(v56op(code) && sp >= 250) add(-1.6, '아군 ' + esc(v56n(holder)) + '의 속도 상한 ' + capV
+    + ' — <b>' + esc(v56n(code)) + '</b>의 ' + sp + ' 속도 이점이 줄어듭니다');
+  /* 하르세티 전장에서 실제로 강한 모양 — 저속 지속딜·반격·불사·난입·상처 */
+  if(v56cut(code) >= 2 && sp < 250) add(2.2, '<b>행게 난입</b> — 속도 상한 ' + capV + '에서도 상대 연속 턴을 끊는 자리');
+  if(M.after_attacked && hit.multi) add(1.6, '<b>피격 반응</b> — 느린 전장에서 맞으면서 되받는 구조');
+  else if(M.counter || L['반격']) add(1.6, '<b>반격</b> — 느린 전장에서 딜을 돌려받는 구조');
+  if(M.injury) add(1.4, '<b>상처</b> — 턴이 길어지는 하르세티 전장에서 최대 생명력을 깎는 축');
+  if((M.immortal || M.no_crit || M.dmg_reduce) && sp < 230) add(1.2, '<b>불사·무치명</b> — 느린 전장의 버티는 브루저');
+  if(!bits.length) return null;
+  v = Math.max(-6.5, Math.min(4.0, v));
+  if(Math.abs(v) < 1.2) return null;            /* 애매한 크기는 사유로 올리지 않는다 */
+  const warn = v <= -1.2;
+  const first = bits.filter(function(b){ return b.v < 0; })[0] || bits[0];
+  const t = warn ? first.t
+    : '아군 <b>' + esc(v56n(holder)) + '</b>(' + capV + ') 전장: <b>' + esc(v56n(code)) + '</b> — ' + first.t;
+  return {v: v, t: t, warn: warn ? 1 : 0,
+          short: (warn ? '하르세티 속도 상한 — ' + v56n(code) + ' 선턴 무효' : '하르세티 전장 적합 — ' + v56n(code)),
+          holder: holder, cap: capV};
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   ③ 상대 어린 셰나 — 피격 반응 패시브 (맞을수록 약화해제·추가공격·추가턴)
+   ════════════════════════════════════════════════════════════════════ */
+const V56_HITBAR = {c1162: 1.7};      /* 어린 셰나: 패시브가 회복·해제·추가공격·추가턴 전부 */
+function v56HitBarrage(foe){
+  const out = [];
+  (foe || []).forEach(function(c){
+    if(!H[c]) return;
+    const M = v56mr(c), L = v56labs(c);
+    if(M.after_attacked || L['반격'] || (M.counter && v56fire(c))){
+      const k = V56_HITBAR[c] || (M.after_attacked ? 1.0 : 0.75);
+      out.push({c: c, k: k, name: v56n(c), pasv: !!M.after_attacked,
+                kind: M.after_attacked ? '피격 반응' : '반격'});
+    }
+  });
+  return out;
+}
+function v56VsHitBarrage(code, mine, foe){
+  const hb = v56HitBarrage(foe);
+  if(!hb.length || !H[code]) return null;
+  const w = Math.min(2.2, hb.reduce(function(s, x){ return s + x.k; }, 0));
+  const lead = hb.slice().sort(function(a, b){ return b.k - a.k; })[0];
+  const hit = v56hit(code), M = v56mr(code), L = v56labs(code);
+  const allyHit = (mine || []).filter(function(c){
+    if(!c || !H[c] || c === code) return false;
+    const t = v56hit(c); return t.aoe || t.multi;
+  }).length;
+  let v = 0; const bits = [];
+  const add = function(x, t){ if(!x) return; v += x; bits.push({v: x, t: t}); };
+  if(hit.aoe){
+    const pen = Math.min(6.0, (1.5 + 0.9 * Math.min(2, allyHit)) * w);
+    add(-pen, '⛔ <b>' + esc(lead.name) + '</b>의 ' + (lead.pasv ? '피격 반응(패시브)' : '반격') + ' — 광역으로 때릴수록 되돌아옵니다'
+      + (allyHit ? ' · 내 광역·다중타 이미 ' + allyHit + '장' : ''));
+  } else if(hit.extra){
+    const pen = Math.min(3.2, (0.70 + 0.40 * Math.min(2, allyHit)) * w);
+    add(-pen, '⛔ <b>' + esc(lead.name) + '</b>에게 <b>추가턴·협공</b>은 피격 횟수만큼 되돌아옵니다'
+      + (allyHit ? ' · 광역·다중타 ' + allyHit + '장째' : ''));
+  } else if(hit.add){
+    const pen = Math.min(1.8, (0.30 + 0.20 * Math.min(2, allyHit)) * w);
+    add(-pen, '<b>' + esc(lead.name) + '</b>의 피격 반응을 한 번 더 자극합니다(같은 스킬 추가공격)'
+      + (allyHit ? ' · 광역·다중타 ' + allyHit + '장째' : ''));
+  }
+  /* 어린 셰나를 실제로 뚫는 축 — 상처·봉인·회복불가·단일 강타·관통·비공격 추가턴 */
+  const healBase = hb.some(function(x){ return v56care(x.c) || v56mr(x.c).heal || v56mr(x.c).regen; });
+  if(M.injury || L['상처'])
+    add(healBase ? 3.2 : 2.2, '<b>상처</b> — 힐·회복 기반 <b>' + esc(lead.name) + '</b>의 최대 생명력을 깎아 유지력을 무너뜨립니다');
+  if(L['봉인'] || M.seal) add(2.4, '<b>봉인</b> — 피격 반응 패시브·스킬을 잠급니다');
+  if(L['회복불가'] || M.unheal) add(2.2, '<b>회복불가</b> — <b>' + esc(lead.name) + '</b>의 힐을 막습니다');
+  if(L['단일딜'] && !hit.aoe && !hit.multi) add(1.2, '<b>단일 강타</b> — 광역으로 다 맞히지 않고 한 명씩 정리');
+  if(!hit.aoe && M.pierce) add(0.8, '<b>관통</b> — 보호막 위로 피해');
+  if(!hit.aoe && !hit.multi && L['비공격'] && L['추가턴']) add(1.0, '<b>비공격 추가턴</b> — 때리지 않고 턴을 벌어 피격 반응을 피합니다');
+  if(M.extinct) add(0.8, '<b>소멸</b> — 부활·불사 축 차단');
+  if(!bits.length) return null;
+  v = Math.max(-7.0, Math.min(6.0, v));
+  if(Math.abs(v) < 1.2) return null;
+  const ord = bits.slice().sort(function(a, b){ return v >= 0 ? b.v - a.v : a.v - b.v; });
+  return {v: v, t: (v >= 0 ? '' : '⛔ ') + esc(v56n(code)) + ' vs ' + esc(lead.name) + ' — ' + ord[0].t.replace(/^⛔ /, ''),
+          warn: v <= -1.6 ? 1 : 0,
+          short: ord[0].t.replace(/<[^>]+>/g, '').slice(0, 40),
+          hits: hb.map(function(x){ return x.c; }), bits: bits, w: w, allyHit: allyHit};
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   ④ 최종 밴 1장 뒤 4인 성립 — 케어·화력·단일 축
+   ════════════════════════════════════════════════════════════════════ */
+/* 지속력 — 힐러가 아니어도 4인에서 버티는 카드(불사·무치명·피해감소·반격·피격반응·흡혈·회복·방어비례) */
+function v56sustain(c){
+  if(!H[c]) return false;
+  if(v56care(c)) return true;
+  const M = v56mr(c), L = v56labs(c);
+  return !!(M.immortal || M.no_crit || M.dmg_reduce || M.counter || M.after_attacked
+            || M.lifesteal || M.heal || M.regen || L['불사'] || L['피해감소'] || L['회복'] || L['반격']);
+}
+function v56SingleAxis(list){
+  return (list || []).filter(function(c){
+    if(!c || !H[c]) return false;
+    const hit = v56hit(c), M = v56mr(c);
+    return v56fire(c) && !hit.aoe && (M.injury || v56lab(c, '단일딜') || M.pierce);
+  });
+}
+function v56LastGuard(code, mine, foe, st){
+  if(!st || st.t !== 'pick' || st.s !== 'my' || (st.i || 0) < 3) return null;
+  const my5 = (mine || []).filter(Boolean).concat([code]);
+  if(my5.length < 5) return null;
+  const guard = (S.my && S.my[2]) || null;      /* 3픽 = 밴가드 */
+  const foe4 = v55Foe4(foe, st) || [];
+  if(foe4.length < 4) return null;
+  /* 상대가 자를 1명 — 상대 입장 위협 + 밴 뒤 승률 하락 */
+  let base = null;
+  try{ base = setEstimate(my5, foe4).est; }catch(e){ return null; }
+  let worstC = null, worstSc = -1e9;
+  my5.forEach(function(c){
+    if(c === guard) return;
+    let e = null;
+    try{ e = setEstimate(my5.filter(function(x){ return x !== c; }), foe4).est; }catch(err){}
+    if(e == null) return;
+    let th = 0;
+    try{ th = (banThreat('opp', c) || {}).total || 0; }catch(err){}
+    const sc = th * 2.0 + (base - e) * 3.0;
+    if(sc > worstSc){ worstSc = sc; worstC = c; }
+  });
+  if(!worstC) return null;
+  const rest = my5.filter(function(c){ return c !== worstC; });
+  const care = rest.filter(v56care);
+  const fire = rest.filter(function(c){ return v56fire(c) && !v56care(c); });
+  const single = v56SingleAxis(rest);
+  const sust = rest.filter(v56sustain);
+  const myCare = (mine || []).filter(function(c){ return c && v56care(c); }).length;
+  const myFire = (mine || []).filter(function(c){ return c && v56fire(c) && !v56care(c); }).length;
+  let v = 0; const bits = [];
+  const add = function(x, t, w){ if(!x) return; v += x; bits.push({v: x, t: t, warn: w ? 1 : 0}); };
+  /* 이 픽이 축을 '망가뜨렸는가'만 센다 — 이미 0명인 축은 이 픽 탓이 아니므로 중립 */
+  if(!care.length)
+    add(-1.6, '⛔ 4인에 <b>힐·정화 없음</b> — 상대 유지력·제어에 밀립니다', 1);
+  if(!care.length && myCare >= 1)
+    add(-3.4, '⛔ 밴 <b>' + esc(v56n(worstC)) + '</b> 뒤 <b>힐·정화 0명</b> — 지금 케어 ' + myCare + '명이 한 장에 걸려 있습니다', 1);
+  else if(care.length === 1)
+    add(-0.8, '케어 1명(' + esc(v56n(care[0])) + ') — 그 1명이 잘리면 0명', 0);
+  if(fire.length < 2 && v56fire(worstC) && !v56care(worstC))
+    add(-2.6, '⛔ 밴 <b>' + esc(v56n(worstC)) + '</b>(화력) 뒤 화력 ' + fire.length + '명 — 마무리가 한 장에 걸립니다', 1);
+  /* 이 픽으로 얇은 축을 이중화하는가 */
+  if(!care.length && !sust.length)
+    add(-2.2, '⛔ 밴 뒤 <b>힐·정화 0명 · 지속 브루저 0명</b> — 4인이 버티지 못합니다', 1);
+  if(v56care(code) && myCare === 0)
+    add(3.6, '지금 내 픽에 <b>힐·정화 0명</b> — 이 픽으로 케어를 확보합니다(1장은 밴당해도 남습니다)', 0);
+  else if(!myCare && v56sustain(code) && sust.length < 2)
+    add(1.4, '지속 축 보강 — 힐 없이 버티는 브루저로 4인 균형', 0);
+  if(v56fire(code) && myFire >= 2 && care.length >= 1)
+    add(0.8, '밴 내성 — 밴 뒤에도 화력·케어가 같이 남습니다', 0);
+  let sim = null;
+  try{ sim = v55ArchWR(rest, foe4); }catch(e){}
+  if(sim && sim.wr) v += (sim.wr - 50) * 0.18;
+  v = Math.max(-6.0, Math.min(6.0, v));
+  if(!bits.length) return null;
+  const short = (v >= 0 ? '밴 후 4인 ' : '⛔ 밴 후 4인 ') + '케어' + care.length + '·화력' + fire.length
+    + '·단일' + single.length;
+  const t = (v >= 0 ? '최종 밴 뒤 4인 — ' : '⛔ 최종 밴 뒤 4인 — ')
+    + '상대가 <b>' + esc(v56n(worstC)) + '</b>를 잘라도 <b>케어 ' + care.length + ' · 화력 ' + fire.length
+    + ' · 단일 ' + single.length + '</b>'
+    + (sim && sim.wr ? ' · 모의 결투 ' + pc(sim.wr) + '%' : '')
+    + (bits[0] ? ' · ' + bits[0].t.replace(/^⛔ /, '') : '');
+  return {v: v, t: t, short: short, warn: v <= -1.6 ? 1 : 0, worstC: worstC, base: base,
+          care: care, fire: fire, single: single, sust: sust, rest: rest, sim: sim};
+}
+
+/* ── 추천 엔진 연결 (② 순수 학습) ───────────────────────────────── */
+const V56WHY = {};
+(function(){
+  const _score = scoreStudy;
+  scoreStudy = function(code, opts){
+    const r = _score(code, opts);
+    try{
+      const st = opts && opts.step;
+      if(!st || st.t !== 'pick' || st.s !== 'my') return r;
+      if(!H[code]) return r;
+      const mine = mineState(), foe = enemiesState();
+      const items = [];
+      let sum = 0;
+      const push = function(o, kind){
+        if(!o) return;
+        sum += o.v;
+        items.push({v: o.v, t: o.t, warn: o.warn ? 1 : 0, kind: kind, short: o.short});
+      };
+      push(v56FirstRisk(code, mine, foe, st), 'first');          /* ① 선픽 카운터 예방 */
+      push(v56PreemptAnswer(code, mine, foe, st), 'preempt2');   /* ①-2 카운터 미리 차단 */
+      push(v56AllySpdCap(code, mine), 'spdcap');                 /* ② 아군 하르세티 */
+      push(v56VsHitBarrage(code, mine, foe), 'hitbar');          /* ③ 어린 셰나 */
+      push(v56LastGuard(code, mine, foe, st), 'ban4');           /* ④ 밴 후 4인 */
+      if(!items.length) return r;
+      r.sc += sum / V56.L2S;
+      r.parts = r.parts || {};
+      r.parts.v56 = (r.parts.v56 || 0) + sum / V56.L2S;
+      const add = items.filter(function(it){ return it.t; }).map(function(it){
+        return {w: 2.4 + Math.abs(it.v) * 0.5, warn: it.warn ? 1 : 0, v56: it.kind, t: it.t};
+      });
+      add.sort(function(a, b){ return (b.warn ? 1 : 0) - (a.warn ? 1 : 0) || b.w - a.w; });
+      r.why = add.concat(r.why || []).slice(0, 9);
+      V56WHY[code] = {v: sum, items: items};
+    }catch(e){}
+    return r;
+  };
+})();
+
+/* ── ③ 통합 — v5.6 보정을 레거시 단위로 다시 얹는다 ─────────────── */
+(function(){
+  const _blend = blendHybrid;
+  blendHybrid = function(leg, stu){
+    const out = _blend(leg, stu);
+    try{
+      let st = null;
+      try{ st = (typeof activeStep === 'function') ? activeStep() : null; }catch(e){}
+      if(!st || st.t !== 'pick' || st.s !== 'my') return out;
+      if(!out.length) return out;
+      const lr = (leg || []).map(function(r){ return r.sc; });
+      let mu = 0; lr.forEach(function(x){ mu += x; }); mu /= Math.max(1, lr.length);
+      let s2 = 0; lr.forEach(function(x){ s2 += (x - mu) * (x - mu); });
+      const sdL = Math.sqrt(s2 / Math.max(1, lr.length)) || 8;
+      out.forEach(function(r){
+        const it = V56WHY[r.code];
+        if(!it || !isFinite(it.v) || !it.v) return;
+        r.sc += it.v / sdL;
+        if(r.parts) r.parts.v56 = (r.parts.v56 || 0) + it.v / V56.L2S;
+        if(it.items && it.items.length){
+          const add = it.items.filter(function(x){ return x.t; }).map(function(x){
+            return {w: 2.4 + Math.abs(x.v) * 0.5, warn: x.warn ? 1 : 0, v56: x.kind, t: x.t};
+          });
+          add.sort(function(a, b){ return (b.warn ? 1 : 0) - (a.warn ? 1 : 0) || b.w - a.w; });
+          r.why = add.concat(r.why || []).slice(0, 9);
+        }
+      });
+      out.sort(function(a, b){ return b.sc - a.sc; });
+    }catch(e){}
+    return out;
+  };
+})();
+
+/* ── 화면 — 선픽 카운터 / 아군 속도 상한 / 어린 셰나 / 밴 후 4인 ──── */
+function v56NoteHTML(){
+  if(typeof VIEW !== 'undefined' && VIEW === 'legacy') return '';
+  let mine = [], foe = [];
+  try{ mine = mineState() || []; foe = enemiesState() || []; }catch(e){}
+  let st = null;
+  try{ st = (typeof activeStep === 'function') ? activeStep() : null; }catch(e){}
+  if(!st || st.t !== 'pick' || st.s !== 'my') return '';
+  const bits = [];
+  const lead = (function(){
+    const hb = v56HitBarrage(foe).sort(function(a, b){ return b.k - a.k; });
+    return (hb.length && hb[0].k >= 1.5) ? hb[0] : null;
+  })();
+  const myHit = mine.filter(function(c){ const t = v56hit(c); return t.aoe || t.multi; }).length;
+  /* ① 선픽 카운터 — 1~3픽은 지금 1순위가 열었을 때의 노출, 4~5픽은 확정된 상대 카운터 */
+  try{
+    if(S.first === 'me' && (st.i || 0) <= 2){
+      const top = (RECS && RECS.arr && RECS.arr[0]) ? RECS.arr[0].code : null;
+      const it = top ? V56WHY[top] : null;
+      const fr = it ? it.items.filter(function(x){ return x.kind === 'first'; })[0] : null;
+      const pa = it ? it.items.filter(function(x){ return x.kind === 'preempt2'; })[0] : null;
+      if(top && (fr || pa)){
+        const h = (pa || fr);
+        if(h.kind === 'preempt2'){
+          bits.push('<b>선픽 카운터 차단</b> ' + esc(String(h.short || '')));
+        } else {
+          bits.push('<b>선픽 카운터</b> ' + esc(v56n(top)) + ' — ' + esc(String(h.short || '')));
+        }
+      }
+    } else if(S.first === 'me' && (st.i || 0) >= 3 && lead){
+      bits.push('<b>카운터 대비</b> ' + esc(lead.name) + '(' + esc(lead.kind) + ') 확정 — 광역·다중타 '
+        + myHit + '장이면 상처·봉인·회복불가로 전환');
+    }
+  }catch(e){}
+  /* ② 아군 속도 상한 */
+  try{
+    const holder = v56SpdCapHolder(mine);
+    if(holder){
+      const spdPicks = mine.filter(function(c){ return v56op(c) && v56spd(c) >= 250 && c !== holder; });
+      bits.push('<b>아군 ' + esc(v56n(holder)) + ' 상한 ' + Math.round(0.9 * v56spd(holder)) + '</b> — '
+        + (spdPicks.length ? spdPicks.slice(0, 2).map(v56n).join('·') + ' 선턴 무효' : '속도 오프너 대신 저속 브루저'));
+    }
+  }catch(e){}
+  /* ③ 피격 반응 상대 — 선픽 4~5픽에서는 ①이 같은 말을 하므로 생략 */
+  try{
+    const dup = (S.first === 'me' && (st.i || 0) >= 3);
+    if(lead && !dup){
+      bits.push('<b>' + esc(lead.name) + '(' + esc(lead.kind) + ') 대응</b> — 상처·봉인·회복불가·단일 강타 우선');
+    }
+  }catch(e){}
+  /* ④ 밴 후 4인 */
+  try{
+    if((st.i || 0) >= 3 && mine.length >= 4){
+      const top = (RECS && RECS.arr && RECS.arr[0]) ? RECS.arr[0].code : null;
+      const it = top ? V56WHY[top] : null;
+      const bg = it ? it.items.filter(function(x){ return x.kind === 'ban4'; })[0] : null;
+      if(bg) bits.push('<b>밴 후 4인</b> ' + esc(String(bg.short || '').replace(/^(⛔ )?밴 후 4인 ?/, '')));
+      else if(mine.filter(function(c){ return v56care(c); }).length === 0)
+        bits.push('<b>밴 후 4인</b> 힐·정화 0명 — 서포터 없이 밴 1장을 맞습니다');
+    }
+  }catch(e){}
+  if(!bits.length) return '';
+  return '<div class="v56Note">🛡️ v5.6 ' + bits.slice(0, 3).join(' · ') + '</div>';
+}
+
+(function(){
+  const _note = modeNoteHTML;
+  modeNoteHTML = function(){ return _note() + v56NoteHTML(); };
+})();
+(function(){
+  const _cmp = compareHTML;
+  compareHTML = function(rec){ return _cmp(rec) + v56NoteHTML(); };
+})();
+
+/* 카드 한 줄 근거 — v5.6 사유를 우선 노출 */
+(function(){
+  const _r = cmpReason;
+  cmpReason = function(r){
+    const it = V56WHY[r.code];
+    if(it && it.items && it.items.length){
+      const order = ['first', 'preempt2', 'spdcap', 'hitbar', 'ban4'];
+      let pick = null;
+      for(let i = 0; i < order.length && !pick; i++){
+        const list = it.items.filter(function(x){ return x.kind === order[i] && !x.warn; });
+        if(list.length) pick = list[0];
+      }
+      if(!pick) pick = it.items.filter(function(x){ return x.warn; })[0] || it.items[0];
+      if(pick){
+        const txt = pick.short ? pick.short : String(pick.t).replace(/<[^>]+>/g, '');
+        return briefTxt(txt, 44);
+      }
+    }
+    return _r(r);
+  };
+})();
+
+/* ②③ 카드에 v5.6 표식 */
+(function(){
+  const _card = cmpCard;
+  cmpCard = function(r, mode, idx){
+    const html = _card(r, mode, idx);
+    try{
+      if(mode !== 'legacy'){
+        const it = V56WHY[r.code];
+        if(it && it.v >= 2.8){
+          const nm = String((it.items.filter(function(x){ return !x.warn; })[0] || {}).t || '').replace(/<[^>]+>/g, '').slice(0, 80);
+          return html.replace('</span>', '</span><i class="v56up" title="v5.6 보정: ' + esc(nm) + '">5.6▲</i>');
+        }
+        if(it && it.v <= -2.8){
+          const nm = String((it.items[0] || {}).t || '').replace(/<[^>]+>/g, '').slice(0, 80);
+          return html.replace('</span>', '</span><i class="v56dn" title="v5.6 보정: ' + esc(nm) + '">5.6▼</i>');
+        }
+      }
+    }catch(e){}
+    return html;
+  };
+})();
+
 document.addEventListener('click', function(ev){
   const mb = ev.target.closest('[data-view]');
   if(mb){ ev.preventDefault(); setView(mb.dataset.view); return; }
@@ -9007,7 +9614,7 @@ window.__app = {get S(){return S;}, get recs(){return RECS;}, H:H, LIST:LIST, ge
     playerBadge:playerBadge, deckThreat:deckThreat, fireOf:fireOf, fireStatus:fireStatus, fireCount:fireCount, aceInfo:aceInfo, myCore:myCore, scorePick:scorePickLegacy, caseDraft:caseDraft, get MDB(){return MDB;}, get player(){return playerStats;}, get SKP(){return SKP;}, skHas:skHas, skSkill:skSkill, skSkillLabel:skSkillLabel, elDiff:elDiff, skillClash:skillClash, elementClash:elementClash, targetRank:targetRank, skPassive:skPassive, skF:skF, targetReason:targetReason, turnPlan:turnPlan, get fitOn(){return fitOn();}, roleModel:roleModel, rmCombo:rmCombo, rmTriple:rmTriple, rmPrebanN:rmPrebanN, rmModels:rmModels, DEFAULT_UNOWNED:DEFAULT_UNOWNED, applyDefaultUnowned:applyDefaultUnowned, get missing(){return S.missing;}, patch:patOf, get PATD(){return PATD;}, setTab:setTab, get tab(){return TAB;}, teamEstimate:teamEstimate, renderMobCheck:renderMobCheck, renderMobBar:renderMobBar, mobTurn:mobTurn,
     openHist:openHist, exitHist:exitHist, histApply:histApply, histRecs:computeRecsAt, renderHist:renderHist, stateBeforeStep:stateBeforeStep,
     get histView(){return HISTVIEW;}, formationPlan:formationPlan, placeLine:placeLine, formationFit:formationFit, condPick:condPick, skillHasAny:skillHasAny, fPref:fPref, fKit:fKit, condOf:condOf, hasCond:hasCond, condLine:condLine, condRowHTML:condRowHTML, get FORM(){return FORM;},
-    get DS(){return DS;}, get SIM(){return SIM;}, get VIEW(){return VIEW;}, setView:setView, scoreStudy:scoreStudy, scorePickLegacy:scorePickLegacy, nearestArch:nearestArch, fullSpec:fullSpec, heroArt:heroArt, compareHTML:compareHTML, renderModeBar:renderModeBar, mrOf:mrOf, foeMech:foeMech, mechPick:mechPick, v51MechWarn:v51MechWarn, briefFrom:briefFrom, get viewName(){return VIEW_NAME[VIEW];}, dsFeat:dsFeat, teamVec:teamVec, turnOrder8:turnOrder8, turnCluster:turnCluster, spdOf:spdOf, spdPick:spdPick, turnOrderHTML:turnOrderHTML, turnBriefHTML:turnBriefHTML, v53SpeedWarn:v53SpeedWarn, v54SoulRisk:v54SoulRisk, v54NotosPick:v54NotosPick, foeHitPressure:foeHitPressure, soulDenyFoe:soulDenyFoe, simSoulEv:simSoulEv, v54Situational:v54Situational, blendHybrid:blendHybrid, scoreOppPick:scoreOppPick, setEstimate:setEstimate, v55Route:v55Route, v55RouteTerms:v55RouteTerms, v55Preempt:v55Preempt, v55BanGuard:v55BanGuard, v55Foe4:v55Foe4, v55Pred:v55Pred, v55NextOppStep:v55NextOppStep, v55NoteHTML:v55NoteHTML, v55FoeSig:v55FoeSig, v55MineSig:v55MineSig, v55Axes:v55Axes, v55Threat:v55Threat, get V55(){return V55;}, get V55WHY(){return V55WHY;}, isCareCard:isCareCard, isHoldCard:isHoldCard, isDD:isDD, isOpenerCard:isOpenerCard, cutinLv:cutinLv, steps:steps};
+    get DS(){return DS;}, get SIM(){return SIM;}, get VIEW(){return VIEW;}, setView:setView, scoreStudy:scoreStudy, scorePickLegacy:scorePickLegacy, nearestArch:nearestArch, fullSpec:fullSpec, heroArt:heroArt, compareHTML:compareHTML, renderModeBar:renderModeBar, mrOf:mrOf, foeMech:foeMech, mechPick:mechPick, v51MechWarn:v51MechWarn, briefFrom:briefFrom, get viewName(){return VIEW_NAME[VIEW];}, dsFeat:dsFeat, teamVec:teamVec, turnOrder8:turnOrder8, turnCluster:turnCluster, spdOf:spdOf, spdPick:spdPick, turnOrderHTML:turnOrderHTML, turnBriefHTML:turnBriefHTML, v53SpeedWarn:v53SpeedWarn, v54SoulRisk:v54SoulRisk, v54NotosPick:v54NotosPick, foeHitPressure:foeHitPressure, soulDenyFoe:soulDenyFoe, simSoulEv:simSoulEv, v54Situational:v54Situational, blendHybrid:blendHybrid, scoreOppPick:scoreOppPick, setEstimate:setEstimate, v55Route:v55Route, v55RouteTerms:v55RouteTerms, v55Preempt:v55Preempt, v55BanGuard:v55BanGuard, v55Foe4:v55Foe4, v55Pred:v55Pred, v55NextOppStep:v55NextOppStep, v55NoteHTML:v55NoteHTML, v55FoeSig:v55FoeSig, v55MineSig:v55MineSig, v55Axes:v55Axes, v55Threat:v55Threat, get V55(){return V55;}, get V55WHY(){return V55WHY;}, isCareCard:isCareCard, isHoldCard:isHoldCard, isDD:isDD, isOpenerCard:isOpenerCard, cutinLv:cutinLv, steps:steps, v56Idx:v56Idx, v56FirstRisk:v56FirstRisk, v56PreemptAnswer:v56PreemptAnswer, v56AllySpdCap:v56AllySpdCap, v56SpdCapHolder:v56SpdCapHolder, v56HitBarrage:v56HitBarrage, v56VsHitBarrage:v56VsHitBarrage, v56LastGuard:v56LastGuard, v56NoteHTML:v56NoteHTML, v56Care:v56care, v56Hit:v56hit, v56SingleAxis:v56SingleAxis, get V56WHY(){return V56WHY;}, get V56(){return V56;}, muWR:muWR, H:H, LIST:LIST};
 })();
 </script>
 </body>
