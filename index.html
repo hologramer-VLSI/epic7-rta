@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#070a12">
-<title>에픽세븐 실레나 밴픽 v4.14 · VLSI 전적 맞춤</title>
+<title>에픽세븐 실레나 밴픽 v4.15 · VLSI 전적 맞춤</title>
 <style>
 :root{
   --bg:#070a12; --bg2:#0b1020; --panel:#0f1729; --panel2:#131f36;
@@ -1164,7 +1164,7 @@ button{font-family:inherit}
   <div class="top">
     <div class="brand">
       <div class="mark">⚔️</div>
-      <div><b>에픽세븐 실레나 밴픽<span class="vtag">v4.14</span></b><span id="subTitle">VLSI 맞춤 · 최신 실전</span></div>
+      <div><b>에픽세븐 실레나 밴픽<span class="vtag">v4.15</span></b><span id="subTitle">VLSI 맞춤 · 최신 실전</span></div>
     </div>
     <div class="spacer"></div>
     <span class="chip data" id="dataChip" title="실제 전적검색 전투 기록">🏆 실전 <b>—</b></span><span class="chip" id="seasonChip">2026 폴 · ss21</span>
@@ -2564,7 +2564,19 @@ function slotGet(st){
   if(st.t==='ban') return st.s==='my' ? S.myBan : S.oppBan;
   return null;
 }
+/* v4.15 : 보드 조합(프리밴 · 1~5픽)이 바뀌면 최종 밴은 무효 — 다시 골라야 한다.
+   2026-11-26 사용자 제보: 밴픽을 끝낸 뒤 ✕로 내/상대 픽을 지우고 다시 채우면
+   예전 최종 밴(S.myBan·S.oppBan)이 그대로 남아 nextStep()이 밴 단계를 건너뛰고
+   '밴픽 끝' 화면이 떠서 최종 밴 추천(renderBanPanel)이 사라졌다.
+   조합이 달라졌으니 밴도 무효로 보고, 마지막 픽을 채우면 밴 단계가 다시 열린다.
+   · 밴 칸 자체의 ✕(st.t==='ban')는 그 밴만 지우는 기존 동작을 그대로 둔다. */
+function invalidateBans(){
+  const had = !!(S.myBan || S.oppBan || S.noOppBan);
+  S.myBan = null; S.oppBan = null; S.noOppBan = false;
+  return had;
+}
 function slotSet(st,code){
+  if(st.t!=='ban' && (slotGet(st)||null) !== (code||null)) invalidateBans();
   if(st.t==='pre') S[st.s+'Pre'][st.i]=code;
   else if(st.t==='pick') S[st.s][st.i]=code;
   else if(st.t==='ban'){ if(st.s==='my') S.myBan=code; else S.oppBan=code; }
