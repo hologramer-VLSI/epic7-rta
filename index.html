@@ -2935,9 +2935,14 @@ function caseDraft(){
     lift[c] = b0 > 0.004 ? Math.max(0.2, Math.min(3.0, p/b0)) : 1.0;
   });
   const order = Object.keys(raw).sort(function(a,b){ return raw[b]-raw[a]; });
+  /* v4.16 : 근거 스트립은 '지금 고를 수 있는 카드'만 — 내 픽·프리밴은 제외 */
+  const hide = {};
+  (S.myPre||[]).concat(S.oppPre||[]).forEach(function(c){ if(c) hide[c]=1; });
+  mine.forEach(function(c){ hide[c]=1; });
+  const topPick = order.filter(function(c){ return !hide[c] && H[c]; }).slice(0,4);
   const conf = Math.min(1, 0.45 + SN/24);
   CASE = {n:SN, w:WT, cnt:cntw, cntRaw:raw, share:share, lift:lift, lvl:sel, conf:conf,
-          weak:weakW, mine:mine.slice(), top:order.slice(0,4), foe:foe.slice(), built:MDB.built};
+          weak:weakW, mine:mine.slice(), top:topPick, foe:foe.slice(), built:MDB.built};
   return CASE;
 }
 /* v4.16 : 이 카드가 '지금 상대를 이긴 실전 덱'에서 얼마나 강한 근거인가 — -8 ~ +32 */
@@ -2949,7 +2954,7 @@ function caseScoreOf(code, cs){
   const lf   = Math.max(0, Math.min(1, (lf0-0.75)/1.45));     // 리프트 0.75 → 0, 2.2 이상 → 1
   const tiny = Math.min(1, p/0.06);                          // 1~2판짜리 저빈도 픽의 리프트 과대평가 억제
   let v = 30*cs.conf*(0.62*freq + 0.38*lf*tiny);
-  if((cs.cntRaw[code]||0) === 0 && cs.n >= 6){
+  if(!(cs.cntRaw[code]||0) && (cs.cnt[code]||0) < 0.6 && cs.n >= 6){
     /* 유사 상대를 이긴 덱에 한 번도 없는 카드 — 이 상대에게는 이긴 조합이 아니다 */
     v = -(3.0 + Math.min(5.0, cs.n/8))*cs.conf;
   } else if(p > 0 && p < 0.035){
