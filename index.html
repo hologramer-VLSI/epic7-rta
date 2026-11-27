@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#070a12">
-<title>에픽세븐 실레나 밴픽 v4.15 · VLSI 전적 맞춤</title>
+<title>에픽세븐 실레나 밴픽 v4.16 · VLSI 전적 맞춤</title>
 <style>
 :root{
   --bg:#070a12; --bg2:#0b1020; --panel:#0f1729; --panel2:#131f36;
@@ -1164,7 +1164,7 @@ button{font-family:inherit}
   <div class="top">
     <div class="brand">
       <div class="mark">⚔️</div>
-      <div><b>에픽세븐 실레나 밴픽<span class="vtag">v4.15</span></b><span id="subTitle">VLSI 맞춤 · 최신 실전</span></div>
+      <div><b>에픽세븐 실레나 밴픽<span class="vtag">v4.16</span></b><span id="subTitle">VLSI 맞춤 · 최신 실전</span></div>
     </div>
     <div class="spacer"></div>
     <span class="chip data" id="dataChip" title="실제 전적검색 전투 기록">🏆 실전 <b>—</b></span><span class="chip" id="seasonChip">2026 폴 · ss21</span>
@@ -1303,6 +1303,7 @@ button{font-family:inherit}
         <dt>밴픽 규칙</dt><dd>프리밴 각 2명 → 선픽 1 → 후픽 2 → 선픽 2 → 후픽 2 → 선픽 2 → 후픽 1 (총 5:5) → <b>3픽은 밴가드(최종 밴 면제)</b> → 서로 1명 최종 밴 → 4:4. 최종 밴 추천은 <b>3픽만 고정</b>하고 나머지 4명을 조합(집합)으로 비교하므로 픽 순서가 달라도 결과가 같습니다.<br><b>프리밴 중복</b>: 같은 팀 두 칸은 서로 다른 영웅이어야 하고, <b>내 프리밴과 상대 프리밴은 같은 영웅이어도 됩니다</b>. 프리밴된 영웅은 양 팀 모두 1~5픽에서 선택할 수 없습니다.</dd>
         <dt>자동 갱신</dt><dd>브라우저에서는 공식 API 응답을 읽을 수 없습니다(CORS 허용 출처가 epic7.onstove.com 뿐). 그래서 <b>① 열 때마다 실시간 호출을 시도</b>(결과를 위 목록에 그대로 표시) <b>② 프록시를 켜면 실시간</b> <b>③ 평소에는 서버측 새로고침 스크립트가 매일 06:00에 이 파일의 스냅샷을 갱신</b>합니다. 새 시즌·신규 영웅도 그때 자동 반영됩니다.</dd>
         <dt>내 전적 맞춤</dt><dd>VLSI(한국) 최근 <b>68판 실제 전적</b>을 내장했습니다. 내 픽 추천 점수에 <b>내 계정 승률</b>을 반영하며(표본 5판 이상, 승률 55%+ 가산 · 40% 미만 감산), 카드에 ‘내 전적 60% (10판)’ · ‘내 전적 저조 32% 주의’ 배지가 붙습니다. <b>3픽(밴가드)</b>에는 내 에이스 딜러를 우선 추천하고, <b>4·5픽</b>에는 1픽이 밴당해도 딜러/브루저가 2명 남도록 ‘딜러 확보 필수’ 보정을 넣습니다. 헤더의 <b>👤 내 전적 맞춤 (VLSI)</b> 버튼으로 끄면 랭커 메타만 사용합니다.</dd>
+        <dt>추천 기준 (v4.16)</dt><dd>상대 픽이 하나라도 있으면 <b>‘이 상대를 이긴 덱’</b>이 순위를 정합니다. 19,438판 전적검색에서 상대 픽과 패배 팀이 겹치는 판(상대 전원 일치 우선, 부족하면 한 명 적은 판을 약하게 보충)을 모아, 그 판들의 <b>승리 팀이 실제로 쓴 카드의 선택 빈도·리프트</b>를 점수화합니다. <b>내가 이미 뽑은 픽까지 같이 쓴 승리 덱</b>은 더 무겁게 봅니다. 1:1 매치업·카운터·속성/스킬 상성·3픽 밴가드 가치는 <b>동점·표본 부족을 가르는 보조 지표</b>로만 쓰이고, 상대를 이긴 덱에 한 번도 없는 카드는 경고와 함께 순위가 내려갑니다. 딜러/케어 확보처럼 조합을 버리는 선택은 예외로 그대로 감점합니다.</dd>
         <dt>기믹 태그</dt><dd>공식 영웅 스킬 설명(epic7db)에서 뽑은 태그. 추천 이유의 상성 판단에 사용합니다.</dd>
       </dl>
       <div>
@@ -2875,11 +2876,19 @@ const MDB = (function(){
   return {n:n, codes:codes, idx:IDX, W:W, L:L, LOS:LOS, WINN:WINN, WSH:WSH, built:(o.built||'')};
 })();
 let CASEKEY='', CASE=null;
+/* ---------------- v4.16 : '이긴 덱' 기준 — 실전 유사 상대 승리 덱의 선택 빈도가 1순위 근거 ----------------
+   사용자 지시(전투 #92504917) : "그냥 이긴 덱을 기준으로 픽을 추천해주면 돼".
+   · 상대 전원이 패배 팀에 있는 판(ov = 상대 픽 수)을 1순위 표본으로 쓰고,
+     한 명 부족한 판은 표본이 얇을 때(1순위 판 < 8)만 약하게(0.30) 섞는다.
+   · 승리 팀이 내가 이미 뽑은 픽과 겹치는 판은 가중(내 픽 1명당 +0.85),
+     내 픽 전원 + 상대 조합까지 같은 판은 4인 조합 매칭으로 한 번 더(+1.1).
+   · 점유율은 사전분포(전체 승리 덱 점유율 WSH)로 스무딩한다 — 1~2판짜리 픽이
+     표본 부족으로 과대평가되지 않게. 리프트 = 스무딩 점유율 / 전체 승리 덱 점유율. */
 function caseDraft(){
   if(!MDB) return null;
   const foe = enemiesState().filter(function(c){ return !!H[c]; });
   if(!foe.length) return null;
-  const mine = mineState();
+  const mine = mineState().filter(function(c){ return !!H[c]; });
   const key = foe.join(',')+'#'+mine.join(',');
   if(CASEKEY===key) return CASE;
   CASEKEY=key; CASE=null;
@@ -2888,46 +2897,65 @@ function caseDraft(){
     const lst = MDB.LOS[foe[i]]; if(!lst) continue;
     for(let j=0;j<lst.length;j++){ const m=lst[j]; hits[m]=(hits[m]||0)+1; }
   }
-  let lv2=0, lv1=0, mx=0;
-  for(const k in hits){ const v=hits[k]; if(v>mx) mx=v; if(v>=2) lv2++; else lv1++; }
-  if(!lv1 && !lv2) return null;
-  /* v4.6 : 가장 많이 겹치는 판부터 쓴다 — 3명 일치 → 2명 일치 → 1명 일치 순.
-     상위 단계 판이 3판 미만이면 한 단계 낮춰 표본을 확보한다(하이브리드). */
+  let mx=0; const lvlCnt={};
+  for(const k in hits){ const v=hits[k]; if(v>mx) mx=v; lvlCnt[v]=(lvlCnt[v]||0)+1; }
+  if(!mx) return null;
+  /* 쓸 단계 — 상대 전원 일치 판이 3판 이상이면 그 판들, 아니면 한 단계씩 낮춘다 */
+  let sel = Math.min(foe.length, mx);
+  while(sel > 1 && (lvlCnt[sel]||0) < 3 && (lvlCnt[sel]||0)+(lvlCnt[sel-1]||0) < 3) sel--;
   const mineSet = {}; mine.forEach(function(c){ mineSet[c]=1; });
-  let use = Math.min(3, mx), sel = null;
-  while(use >= 1){
-    let n0=0; for(const k in hits){ if(hits[k]>=use) n0++; }
-    if(n0 >= 3 || use === 1){ sel = use; break; }
-    use--;
-  }
-  const cnt = {}, cntRaw = {};
-  let N=0, WT=0;
-  for(const k in hits){
-    const m=+k, ov=hits[k];
-    if(ov < sel) continue;
+  const list = [];
+  for(const k in hits){ const ov=hits[k]; if(ov >= sel || (sel>1 && ov === sel-1)) list.push({m:+k, ov:ov}); }
+  let SN = 0; for(let i=0;i<list.length;i++){ if(list[i].ov>=sel) SN++; }
+  if(!SN) return null;
+  const weakW = (SN < 8) ? 0.30 : 0;          // 표본이 얇을 때만 한 단계 아래 판을 섞는다
+  const cntw = {}, raw = {};
+  let WT = 0;
+  for(let i=0;i<list.length;i++){
+    const x = list[i], m = x.m;
+    if(x.ov < sel && !weakW) continue;
     let mo=0;
     for(let j=0;j<4;j++){ const c=MDB.codes[MDB.W[m*4+j]]; if(c && mineSet[c]) mo++; }
-    const wt = 1 + 0.55*Math.min(3,mo) + 0.25*Math.max(0,ov-1);
+    let wt = (x.ov >= sel ? 1 : weakW) * (1 + 0.85*mo + ((mine.length>=2 && mo===mine.length) ? 1.1 : 0));
+    WT += wt;
     for(let j=0;j<4;j++){
       const c=MDB.codes[MDB.W[m*4+j]]; if(!c) continue;
-      cnt[c]=(cnt[c]||0)+wt; cntRaw[c]=(cntRaw[c]||0)+1;
+      cntw[c]=(cntw[c]||0)+wt;
+      if(x.ov >= sel) raw[c]=(raw[c]||0)+1;
     }
-    N++; WT+=wt;
   }
-  if(!N) return null;
-  const order = Object.keys(cntRaw).sort(function(a,b){ return cntRaw[b]-cntRaw[a]; });
-  const conf = sel>=2 ? Math.min(1, 0.45 + N/22) : Math.min(1, 0.35 + N/30);
-  /* v4.13 : 리프트 = (유사 상대를 이긴 덱에서의 점유율) / (전체 승리 덱 점유율).
-     >1 이면 '이 상대에게 유독 잘 통하는 카드', ≈1 이면 전역 인기 카드일 뿐. */
+  if(!WT) return null;
+  const K0 = 4;                                 // 스무딩 강도(사전 표본)
+  const WSH = MDB.WSH || {};
   const share = {}, lift = {};
-  Object.keys(cnt).forEach(function(c){
-    share[c] = WT ? cnt[c]/WT : 0;
-    const b0 = (MDB.WSH && MDB.WSH[c]) || 0;
-    lift[c] = b0 > 0.004 ? Math.max(0.2, Math.min(3.0, share[c]/b0)) : 1.0;
+  Object.keys(WSH).forEach(function(c){
+    const b0 = WSH[c] || 0;
+    const p = ((cntw[c]||0) + K0*b0) / (WT + K0);
+    share[c] = p;
+    lift[c] = b0 > 0.004 ? Math.max(0.2, Math.min(3.0, p/b0)) : 1.0;
   });
-  CASE = {n:N, w:WT, cnt:cnt, cntRaw:cntRaw, share:share, lift:lift, lvl:sel, conf:conf,
-          top:order.slice(0,4), foe:foe.slice(), built:MDB.built};
+  const order = Object.keys(raw).sort(function(a,b){ return raw[b]-raw[a]; });
+  const conf = Math.min(1, 0.45 + SN/24);
+  CASE = {n:SN, w:WT, cnt:cntw, cntRaw:raw, share:share, lift:lift, lvl:sel, conf:conf,
+          weak:weakW, mine:mine.slice(), top:order.slice(0,4), foe:foe.slice(), built:MDB.built};
   return CASE;
+}
+/* v4.16 : 이 카드가 '지금 상대를 이긴 실전 덱'에서 얼마나 강한 근거인가 — -8 ~ +32 */
+function caseScoreOf(code, cs){
+  if(!cs) return 0;
+  const p = (cs.share[code] !== undefined) ? cs.share[code] : 0;
+  const lf0 = cs.lift[code] || 1;
+  const freq = Math.pow(Math.min(1, p/0.40), 0.75);          // 점유율: 그 상대를 이긴 덱의 40%를 만점 기준
+  const lf   = Math.max(0, Math.min(1, (lf0-0.75)/1.45));     // 리프트 0.75 → 0, 2.2 이상 → 1
+  const tiny = Math.min(1, p/0.06);                          // 1~2판짜리 저빈도 픽의 리프트 과대평가 억제
+  let v = 30*cs.conf*(0.62*freq + 0.38*lf*tiny);
+  if((cs.cntRaw[code]||0) === 0 && cs.n >= 6){
+    /* 유사 상대를 이긴 덱에 한 번도 없는 카드 — 이 상대에게는 이긴 조합이 아니다 */
+    v = -(3.0 + Math.min(5.0, cs.n/8))*cs.conf;
+  } else if(p > 0 && p < 0.035){
+    v = Math.min(v, 4.0*cs.conf) - 2.0;                      // 1~2판만 나온 카드
+  }
+  return v;
 }
 /* v4.6 : 전적검색 실전 근거 스트립 — 유사 상대를 이긴 랭커 덱의 최다 픽 */
 function renderCaseStrip(rec){
@@ -3489,24 +3517,22 @@ function scorePick(code, opts){
   });
   add('pair', Math.max(-7, Math.min(7, pairSum)));
 
-  // ── v4.6 : 전적검색 실전 판 — 지금 상대 조합을 이긴 랭커 덱이 실제로 쓴 카드 ──
+  // ── v4.16 : 실전에서 지금 상대를 이긴 덱이 실제로 쓴 카드 — 추천 순위의 1순위 축 ──
   const cs = foe.length ? caseDraft() : null;
-  if(cs && cs.cnt[code]){
-    const share = cs.cnt[code]/cs.w;
-    /* v4.13 : 전역 인기 카드가 아무 상대에게나 1순위로 올라오지 않도록 '리프트'를 곱한다. */
-    const lf = Math.max(0.45, Math.min(1.8, Math.pow(cs.lift[code] || 1, 0.9)));
-    let cb = 8.0*Math.pow(Math.min(1, share/0.40), 0.8) * lf;
-    if(cs.lvl<2) cb *= 0.55;
-    if(idx===0) cb *= (MY_FIRST ? 0.6 : 0.85);   // v4.14 : 후픽 1픽은 상대 1픽이 이미 있는 실제 반응 자리
-    cb *= cs.conf;
-    cb = Math.min(9.5, cb);
-    add('case', cb);
-    if(cb>=1.0){
-      const fn = cs.foe.slice(0,2).map(function(c){ return esc(H[c].name); }).join('·');
+  if(cs){
+    const caseV = caseScoreOf(code, cs) * (idx===0 ? 0.9 : 1);
+    add('case', caseV);
+    const fn = cs.foe.slice(0,3).map(function(c){ return esc(H[c].name); }).join('·');
+    if(caseV >= 3){
       const lfTxt = (cs.lift[code] || 1) >= 1.25 ? ' · 이 상대에게 <b>x'+pc(cs.lift[code])+'</b> 자주 등장'
                   : ((cs.lift[code] || 1) <= 0.8 ? ' · 이 상대엔 평소보다 적음' : '');
-      why.push({w:7.6, hot:1, case:1,
-        t:'실전 유사 상대(<b>'+fn+'</b> 포함 <b>'+cs.n+'판</b>)를 이긴 랭커 덱에서 <b>'+cs.cntRaw[code]+'회</b> 선택'+lfTxt});
+      why.push({w:10.0, hot:1, case:1,
+        t:'<b>실전 이긴 덱</b> — <b>'+fn+'</b> 상대를 이긴 '+cs.n+'판 중 <b>'+(cs.cntRaw[code]||0)+'회</b> 선택('
+          + Math.round(100*(cs.cntRaw[code]||0)/Math.max(1,cs.n)) + '%)'+lfTxt
+          + (cs.mine.length ? ' · 내 픽 동반 가중' : '')});
+    } else if(caseV <= -2.5){
+      why.push({w:9.0, warn:1, case:1,
+        t:'<b>이 상대를 이긴 덱에 없음</b> — <b>'+fn+'</b> 조합을 이긴 실전 '+cs.n+'판에 이 카드는 한 번도 나오지 않았습니다'});
     }
   }
 
@@ -3741,8 +3767,38 @@ function scorePick(code, opts){
   /* v4.6 : 고정 기본점 압축 — 상위 30~40명 기본점 차이를 6~10점대로 모은다(순서는 유지).
      2~5픽+상대 픽이 있는 국면에서만 적용하고, 1픽은 기존 스케일을 그대로 쓴다. */
   const metaSc = REACT ? 16*Math.pow(Math.max(0, meta)/30, 0.55) : meta;
-  sc += metaSc;
-  if(opts.dbg){ P.metaRaw = Math.round(meta*100)/100; P.metaSc = Math.round(metaSc*100)/100; }
+  /* ── v4.16 : '이긴 덱' 우선 집계 ──
+     상대 픽이 있는 국면(CF)에서는 case 점수가 결론을 만들고, 나머지 지표는
+     가중치를 낮춰 합산한 뒤 tanh 로 압축한다(±8) — 1:1 매치업·카운터·픽순은
+     동점·표본 부족을 가르는 보조 지표로만 작용한다.
+     단, 4:4 밸런스(딜러/케어)와 안티 시너지처럼 '조합을 버리는' 감점은 압축 없이 그대로 둔다. */
+  const CF = !!(cs && step && step.t==='pick' && step.s==='my');
+  if(CF){
+    const WP = {'base':0.30,'order':0.26,'slot':0.40,'patch':0.45,'fire':0.45,
+                'counter':0.34,'mu':0.36,'pair':0.42,'arch':0.36,'el':0.38,'skill':0.38,
+                'syn':0.50,'syn2':0.50,'preban':0.52,'plan':0.45,'oppNx':0.36,'deny':0.50,
+                'dbl':0.42,'banv':0.38,'fit':0.50,'exp':0.50,'art':0.50,'cond':0.50,'form':0.50,
+                'role':0.50,'ace':0.18};
+    let light = 0, hard = 0;
+    Object.keys(P).forEach(function(k){
+      const v = P[k]; if(!v || k==='case') return;
+      if(k==='fire' || k==='bal' || k==='axis' || k==='anti' || k==='weak' || k==='hars'){
+        hard += (v < 0) ? v : v*0.55;                 // 밸런스·안티 시너지 감점은 그대로
+        return;
+      }
+      light += ((WP[k]!==undefined) ? WP[k] : 0.45) * v;
+    });
+    const CAP = 8.0;
+    const lightS = CAP*Math.tanh(light/CAP);
+    sc = (P['case']||0) + lightS + hard;
+    /* v4.16 : 이 자리(1~5픽) 실전 비중이 극히 낮은 카드의 안전장치 */
+    if(po && po.tot>=200 && po.share<0.03 && idx!==po.bestSlot) sc -= 3.0;
+    if(opts.dbg){ P.metaRaw = Math.round(meta*100)/100; P.metaSc = Math.round(metaSc*100)/100;
+                  P.lightS = Math.round(lightS*100)/100; P.hardK = Math.round(hard*100)/100; }
+  } else {
+    sc += metaSc;
+    if(opts.dbg){ P.metaRaw = Math.round(meta*100)/100; P.metaSc = Math.round(metaSc*100)/100; }
+  }
   /* v4.13 : 학습 근거 줄 — '왜 이 픽인지' 스킬·패시브·전적을 카드에 그대로 보여준다 */
   const basis = (opts.noBasis ? '' : pickBasis(code, mine, foe));
   return {code:code, sc:sc, why:sortWhy(why), needFire:needFire, ace:isAce, rm:rmHit, basis:basis,
@@ -7231,4 +7287,4 @@ window.__app = {get S(){return S;}, slotSplit:slotSplit, heroModeTot:heroModeTot
 </script>
 </body>
 </html>
-<!-- build: v4.15 2026-11-26 r2 (밴픽 완료 후 재선택 시 최종 밴 추천 복원) -->
+<!-- build: v4.16 2026-11-28 (이긴 덱 기준 추천 — 유사 상대 승리 덱 빈도·리프트가 1순위 축) -->
